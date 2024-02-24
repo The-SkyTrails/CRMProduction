@@ -55,111 +55,111 @@ from .notifications import (
 class admin_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Admin/Dashboard/dashboard.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
 
-        enq_count = 0
-        enq_enrolled_count = 0
-        agent_count = Agent.objects.count()
+    #     enq_count = 0
+    #     enq_enrolled_count = 0
+    #     agent_count = Agent.objects.count()
 
-        outsourceagent_count = OutSourcingAgent.objects.count()
+    #     outsourceagent_count = OutSourcingAgent.objects.count()
 
-        total_agent_count = agent_count + outsourceagent_count
+    #     total_agent_count = agent_count + outsourceagent_count
 
-        employee_count = Employee.objects.count()
+    #     employee_count = Employee.objects.count()
 
-        leadarchive_count = Enquiry.objects.filter(archive="True").count()
+    #     leadarchive_count = Enquiry.objects.filter(archive="True").count()
 
-        leadaccept_count = Enquiry.objects.filter(lead_status="Enrolled").count()
+    #     leadaccept_count = Enquiry.objects.filter(lead_status="Enrolled").count()
 
-        leadinprocess_count = Enquiry.objects.filter(
-            Q(lead_status="Inprocess") | Q(lead_status="Ready To Submit")
-        ).count()
+    #     leadinprocess_count = Enquiry.objects.filter(
+    #         Q(lead_status="Inprocess") | Q(lead_status="Ready To Submit")
+    #     ).count()
 
-        leadappoint_count = Enquiry.objects.filter(
-            Q(lead_status="Appointment") | Q(lead_status="Ready To Collection")
-        ).count()
+    #     leadappoint_count = Enquiry.objects.filter(
+    #         Q(lead_status="Appointment") | Q(lead_status="Ready To Collection")
+    #     ).count()
 
-        completed_count = Enquiry.objects.filter(lead_status="Delivery").count()
+    #     completed_count = Enquiry.objects.filter(lead_status="Delivery").count()
 
-        leadpending_count = Enquiry.objects.filter(
-            Q(lead_status="Active") | Q(lead_status="PreEnrolled")
-        ).count()
+    #     leadpending_count = Enquiry.objects.filter(
+    #         Q(lead_status="Active") | Q(lead_status="PreEnrolled")
+    #     ).count()
 
-        leadtotal_count = Enquiry.objects.all().count()
+    #     leadtotal_count = Enquiry.objects.all().count()
 
-        leadnew_count = Enquiry.objects.filter(lead_status="New Lead").count()
-        leadresult_count = Enquiry.objects.filter(lead_status="Result").count()
+    #     leadnew_count = Enquiry.objects.filter(lead_status="New Lead").count()
+    #     leadresult_count = Enquiry.objects.filter(lead_status="Result").count()
 
-        package = Package.objects.filter(approval="True").order_by("-last_updated_on")[
-            :10
-        ]
+    #     package = Package.objects.filter(approval="True").order_by("-last_updated_on")[
+    #         :10
+    #     ]
 
-        url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
-        response = requests.get(url)
-        data = response.json()
-        webpackages = data["data"]["pakage"]
+    #     url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
+    #     response = requests.get(url)
+    #     data = response.json()
+    #     webpackages = data["data"]["pakage"]
 
-        for webpackage in webpackages:
-            webpackage["id"] = webpackage.pop("_id")
+    #     for webpackage in webpackages:
+    #         webpackage["id"] = webpackage.pop("_id")
 
-        active_users = CustomUser.objects.filter(is_logged_in=True).count()
-        active_employee = CustomUser.objects.filter(user_type="3", is_logged_in=True)
-        active_agent = CustomUser.objects.filter(
-            user_type__in=["4", "5"], is_logged_in=True
-        )
+    #     active_users = CustomUser.objects.filter(is_logged_in=True).count()
+    #     active_employee = CustomUser.objects.filter(user_type="3", is_logged_in=True)
+    #     active_agent = CustomUser.objects.filter(
+    #         user_type__in=["4", "5"], is_logged_in=True
+    #     )
 
-        story = SuccessStory.objects.all()
+    #     story = SuccessStory.objects.all()
 
-        latest_news = News.objects.order_by("-created_at")[:10]
+    #     latest_news = News.objects.order_by("-created_at")[:10]
 
-        enrolled_monthly_counts = (
-            Enquiry.objects.filter(lead_status="Enrolled")
-            .annotate(month=TruncMonth("registered_on"))
-            .values("month")
-            .annotate(count=Count("id"))
-            .order_by("month__month")
-        )
-        if enrolled_monthly_counts.exists():
-            enq_enrolled_count = enrolled_monthly_counts[0]["count"]
+    #     enrolled_monthly_counts = (
+    #         Enquiry.objects.filter(lead_status="Enrolled")
+    #         .annotate(month=TruncMonth("registered_on"))
+    #         .values("month")
+    #         .annotate(count=Count("id"))
+    #         .order_by("month__month")
+    #     )
+    #     if enrolled_monthly_counts.exists():
+    #         enq_enrolled_count = enrolled_monthly_counts[0]["count"]
 
-        all_enq = (
-            Enquiry.objects.all()
-            .annotate(month=TruncMonth("registered_on"))
-            .values("month")
-            .annotate(count=Count("id"))
-            .order_by("month__month")
-        )
-        todo = Todo.objects.filter(user=self.request.user).order_by("-id")
+    #     all_enq = (
+    #         Enquiry.objects.all()
+    #         .annotate(month=TruncMonth("registered_on"))
+    #         .values("month")
+    #         .annotate(count=Count("id"))
+    #         .order_by("month__month")
+    #     )
+    #     todo = Todo.objects.filter(user=self.request.user).order_by("-id")
 
-        if all_enq.exists():
-            enq_count = all_enq[0]["count"]
+    #     if all_enq.exists():
+    #         enq_count = all_enq[0]["count"]
 
-        context["total_agent_count"] = total_agent_count
-        context["employee_count"] = employee_count
-        context["leadarchive_count"] = leadarchive_count
-        context["leadaccept_count"] = leadaccept_count
-        context["leadpending_count"] = leadpending_count
-        context["leadtotal_count"] = leadtotal_count
-        context["leadnew_count"] = leadnew_count
-        context["package"] = package
-        context["enrolled_monthly_counts"] = enrolled_monthly_counts
-        context["all_enq"] = all_enq
-        context["enq_count"] = enq_count
-        context["enq_enrolled_count"] = enq_enrolled_count
-        context["story"] = story
-        context["latest_news"] = latest_news
-        context["todo"] = todo
-        context["active_users"] = active_users
-        context["active_employee"] = active_employee
-        context["active_agent"] = active_agent
-        context["leadinprocess_count"] = leadinprocess_count
-        context["leadappoint_count"] = leadappoint_count
-        context["completed_count"] = completed_count
-        context["leadresult_count"] = leadresult_count
-        context["webpackages"] = webpackages
+    #     context["total_agent_count"] = total_agent_count
+    #     context["employee_count"] = employee_count
+    #     context["leadarchive_count"] = leadarchive_count
+    #     context["leadaccept_count"] = leadaccept_count
+    #     context["leadpending_count"] = leadpending_count
+    #     context["leadtotal_count"] = leadtotal_count
+    #     context["leadnew_count"] = leadnew_count
+    #     context["package"] = package
+    #     context["enrolled_monthly_counts"] = enrolled_monthly_counts
+    #     context["all_enq"] = all_enq
+    #     context["enq_count"] = enq_count
+    #     context["enq_enrolled_count"] = enq_enrolled_count
+    #     context["story"] = story
+    #     context["latest_news"] = latest_news
+    #     context["todo"] = todo
+    #     context["active_users"] = active_users
+    #     context["active_employee"] = active_employee
+    #     context["active_agent"] = active_agent
+    #     context["leadinprocess_count"] = leadinprocess_count
+    #     context["leadappoint_count"] = leadappoint_count
+    #     context["completed_count"] = completed_count
+    #     context["leadresult_count"] = leadresult_count
+    #     context["webpackages"] = webpackages
 
-        return context
+    #     return context
 
 
 @login_required

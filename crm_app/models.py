@@ -10,6 +10,7 @@ import datetime
 from django.db.models import Q
 import json
 import uuid
+from .utils import generate_ref_code
 
 
 BRANCH_SOURCES = [
@@ -84,10 +85,16 @@ class CustomUser(AbstractUser):
 
 
 class Admin(models.Model):
-
+    # id = models.IntegerField(unique=True, default=generate_ref_code, editable=False)
     users = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     department = models.CharField(max_length=50)
     contact_no = models.CharField(max_length=10)
+
+    def save(self, *args, **kwargs):
+        # Generate the reference code if it's not already set
+        if not self.id:
+            self.id = generate_ref_code()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.users.first_name

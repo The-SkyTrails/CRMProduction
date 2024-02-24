@@ -61,13 +61,31 @@ def current_login(request):
 
         elif request.user.user_type == "2":
             user = request.user
+            print("helloo")
 
-            notification = Notification.objects.filter(is_seen=False).order_by("-id")
-            notification_Count = Notification.objects.filter(is_seen=False).count()
+            notification = Notification.objects.all().order_by("-id")
 
-            return {
-                "notification": notification,
-                "notification_Count": notification_Count,
-            }
+            # notification_Count = Notification.objects.all().count()
+            queryset = Notification.objects.filter(is_seen__in=[False]).count()
+            print(queryset)
+            if user:
+                pass
+                # queryset = Notification.objects.filter(is_seen=0).count()
+
+                #
+                # notification = Notification.objects.filter(is_seen=False).order_by("-id")
+                # print("sssss", notifications)
+                # notification_Count = Notification.objects.filter(
+                #     is_seen__in=[False]
+                # ).count()
+                # print("notification", notification_Count.query)
+
+                # notification_count = Notification.objects.filter(is_seen=False).count()
+                # print("notification count:", notification_count)
+
+            # return {
+            #     "notification": notification,
+            #     "notification_Count": notification_Count,
+            # }
 
     return {}
