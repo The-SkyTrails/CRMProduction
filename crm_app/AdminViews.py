@@ -486,9 +486,9 @@ def delete_casecategorydocument(request, id):
 
 
 ######################################### BRANCH #################################################
+from django.db import IntegrityError
 
 
-@login_required
 def add_branch(request):
     branch = Branch.objects.all().order_by("-id")
     form = BranchForm(request.POST or None)
@@ -497,11 +497,16 @@ def add_branch(request):
         branch_name = form.cleaned_data["branch_name"]
         user = request.user
         form.instance.last_updated_by = user
-        if Branch.objects.filter(branch_name__iexact=branch_name).exists():
-            messages.error(request, "This Branch already exists.")
-        else:
+        try:
             form.save()
             messages.success(request, "Branch added successfully")
+            return HttpResponseRedirect(reverse("add_branch"))
+        except IntegrityError as e:
+            # Handle the integrity error
+            if "duplicate key" in str(e):
+                messages.error(request, "This Branch already exists.")
+            else:
+                messages.error(request, "An error occurred while adding the branch.")
             return HttpResponseRedirect(reverse("add_branch"))
 
     context = {"form": form, "branch": branch}
