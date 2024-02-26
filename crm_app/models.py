@@ -103,9 +103,9 @@ class Admin(models.Model):
 class VisaCountry(models.Model):
 
     country = models.CharField(max_length=100)
-    created = models.DateTimeField(auto_now=True)
+    created = models.DateField(auto_now_add=True)
     lastupdated_by = models.CharField(max_length=100, null=True, blank=True)
-    last_updated_on = models.DateTimeField(auto_now=True)
+    last_updated_on = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return str(self.country)
@@ -177,7 +177,7 @@ class Branch(models.Model):
     last_updated_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True
     )
-    last_updated_on = models.DateTimeField(auto_now=True)
+    # last_updated_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.branch_name
@@ -447,12 +447,12 @@ class Package(models.Model):
     last_updated_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True
     )
-    last_updated_on = models.DateTimeField(auto_now=True)
+    last_updated_on = models.DateField(auto_now=True)
     image = models.FileField(upload_to="media/package_images/", null=True, blank=True)
     processing_time = models.CharField(
         max_length=30, choices=PROCESSING_TIME_CHOICES, blank=True, null=True
     )
-    approval = models.BooleanField(default="False")
+    approval = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title

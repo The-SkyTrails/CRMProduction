@@ -61,7 +61,6 @@ def current_login(request):
 
         elif request.user.user_type == "2":
             user = request.user
-            print("helloo")
 
             notification = Notification.objects.all().order_by("-id")
 
