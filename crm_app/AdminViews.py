@@ -173,8 +173,9 @@ def add_visacountry(request):
         country_name = form.cleaned_data["country"]
         user = request.user
         form.instance.lastupdated_by = f"{user.first_name} {user.last_name}"
-        if VisaCountry.objects.filter(country=country_name):
+        if VisaCountry.objects.filter(country__iexact=country_name).exists():
             messages.error(request, "This country already exists.")
+            return redirect("add_visacountry")
         else:
             form.save()
             messages.success(request, "Visa Country added successfully")
@@ -250,26 +251,38 @@ def add_visacategory(request):
         form = VisaCategoryForm(request.POST)
         if form.is_valid():
             category = form.cleaned_data["category"]
+
             subcategory = form.cleaned_data["subcategory"]
             visa_country_id = form.cleaned_data["visa_country_id"]
             form.instance.lastupdated_by = f"{user.first_name} {user.last_name}"
-
             if VisaCategory.objects.filter(
-                Q(
-                    category__iexact=category,
-                    subcategory__iexact=subcategory,
-                    visa_country_id=visa_country_id,
-                )
-                | Q(
-                    category__iexact=category,
-                    subcategory__iexact=subcategory,
-                    visa_country_id__isnull=True,
-                )
-            ).exists():
+                category=category,
+                subcategory=subcategory,
+                visa_country_id=visa_country_id,
+            ):
                 messages.error(
                     request,
-                    "Category/Subcategory already exists for the selected country.",
+                    "Category/Subcategory already exists for the selected country",
                 )
+                return redirect("add_visacategory")
+
+                print("heloooooooooooo")
+            # if VisaCategory.objects.filter(
+            #     Q(
+            #         category=category,
+            #         subcategory=subcategory,
+            #         visa_country_id=visa_country_id,
+            #     )
+            #     | Q(
+            #         category__iexact=category,
+            #         subcategory__iexact=subcategory,
+            #         visa_country_id__isnull=True,
+            #     )
+            # ).exists():
+            #     messages.error(
+            #         request,
+            #         "Category/Subcategory already exists for the selected country.",
+            #     )
             else:
                 form.save()
                 messages.success(
@@ -770,6 +783,8 @@ def import_branch(request):
 
 ######################################### EMPLOYEE #################################################
 
+from django.db.models import Max
+
 
 @login_required
 def add_employee(request):
@@ -778,6 +793,7 @@ def add_employee(request):
     dep = Department_Choices
 
     if request.method == "POST":
+
         department = request.POST.get("department")
         emp_code = request.POST.get("emp_code")
         branch_id = request.POST.get("branch_id")
@@ -796,70 +812,75 @@ def add_employee(request):
         authorization = request.POST.get("authorization")
         tata_tele_agent_no = request.POST.get("tata_tele_agent_no")
         files = request.FILES.get("file")
+        print("workinggggggggggggg", emp_code)
 
         if not branch_id:
             messages.warning(request, "Branch ID is required")
             return redirect("emp_personal_details")
 
-        try:
-            branchh = Branch.objects.get(id=branch_id)
-            group = Group.objects.get(id=group_id)
-            if Employee.objects.filter(contact_no__iexact=contact).exists():
-                messages.error(request, "Contact No. already exists.")
-                return redirect("emp_personal_details")
-            if Employee.objects.filter(emp_code__iexact=emp_code).exists():
-                messages.error(request, "Employee Code already exists.")
-                return redirect("emp_personal_details")
-            if CustomUser.objects.filter(email__iexact=email).exists():
-                messages.error(request, "Email Address already Register...")
-                return redirect("emp_personal_details")
-            user = CustomUser.objects.create_user(
-                username=email,
-                first_name=firstname,
-                last_name=lastname,
-                email=email,
-                password=password,
-                user_type="3",
-            )
+        # try:
 
-            user.employee.department = department
-            user.employee.emp_code = emp_code
-            user.employee.branch = branchh
-            user.employee.group = group
-            user.employee.contact_no = contact
-            user.employee.country = country
-            user.employee.state = state
-            user.employee.City = city
-            user.employee.Address = address
-            user.employee.zipcode = zipcode
-            user.employee.tata_tele_api_key = api_key
-            user.employee.tata_tele_authorization = authorization
-            user.employee.tata_tele_agent_number = tata_tele_agent_no
-            user.employee.file = files
+        branchh = Branch.objects.get(id=branch_id)
+        group = Group.objects.get(id=group_id)
 
-            user.save()
+        max_id = CustomUser.objects.aggregate(max_id=Max("id"))["max_id"]
+        new_customuser_id = max_id + 1 if max_id is not None else 1
 
-            send_congratulatory_email(
-                firstname, lastname, email, password, user_type="3"
-            )
-            messages.success(
-                request,
-                "Employee Added Successfully , Congratulation Mail Send Successfully!!",
-            )
+        emp_max_id = Employee.objects.aggregate(max_id=Max("id"))["max_id"]
+        new_employee_id = emp_max_id + 1 if emp_max_id is not None else 1
+        user = CustomUser.objects.create_user(
+            # id=new_customuser_id,
+            username=email,
+            first_name=firstname,
+            last_name=lastname,
+            email=email,
+            password=password,
+            user_type="3",
+        )
 
-            mobile = contact
-            try:
-                whatsapp_signup_mes(
-                    firstname, lastname, email, password, mobile, user_type="3"
-                )
-            except:
-                pass
+        # employee = Employee.objects.create(users=user,department = department,branch = branchh,group = group,contact_no = contact,country = country,state = state,City = city,Address = address,zipcode = zipcode,tata_tele_api_key = api_key,tata_tele_authorization = authorization,tata_tele_agent_number = tata_tele_agent_no,file = files)
 
-            return redirect("emp_list")
+        # employee.save()
+        # user.employee.id = new_employee_id
+        user.employee.department = department
+        user.employee.emp_code = emp_code
+        user.employee.branch = branchh
+        user.employee.group = group
+        user.employee.contact_no = contact
+        user.employee.country = country
+        user.employee.state = state
+        user.employee.City = city
+        user.employee.Address = address
+        user.employee.zipcode = zipcode
+        user.employee.tata_tele_api_key = api_key
+        user.employee.tata_tele_authorization = authorization
+        user.employee.tata_tele_agent_number = tata_tele_agent_no
+        user.employee.file = files
+        # user.users = new_customuser_id
+        user.save()
 
-        except Exception as e:
-            messages.warning(request, str(e))
-            return redirect("emp_personal_details")
+        print("tryyyyyyyyy catchhhhhhhhh")
+
+        send_congratulatory_email(firstname, lastname, email, password, user_type="3")
+        messages.success(
+            request,
+            "Employee Added Successfully , Congratulation Mail Send Successfully!!",
+        )
+
+        mobile = contact
+        return redirect("emp_list")
+        # try:
+        #     whatsapp_signup_mes(
+        #         firstname, lastname, email, password, mobile, user_type="3"
+        #     )
+        # except:
+        #     pass
+
+        # return redirect("emp_list")
+
+        # except Exception as e:
+        #     messages.warning(request, str(e))
+        #     return redirect("emp_personal_details")
 
     context = {"branch": branches, "group": groups, "dep": dep}
     return render(request, "Admin/Employee Management/addemp1.html", context)
@@ -2311,11 +2332,25 @@ def get_outsourcepartner():
     return OutSourcingAgent.objects.all()
 
 
+from django.core.paginator import Paginator
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
 @login_required
 def admin_new_leads_details(request):
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
+
     enquiry = Enquiry.objects.all().order_by("-id")
+    paginator = Paginator(enquiry, 10)
+    page = request.GET.get("page")
+    try:
+        enquiry = paginator.page(page)
+    except PageNotAnInteger:
+        enquiry = paginator.page(1)
+    except EmptyPage:
+        enquiry = paginator.page(paginator.num_pages)
 
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
@@ -2335,7 +2370,6 @@ def admin_new_leads_details(request):
         "assesment_employee": assesment_employee,
         "agent": agent,
         "outsourcepartner": outsourcepartner,
-        # "enquiries_with_spouse_names": enquiries_with_spouse_names,
     }
     return render(request, "Admin/Enquiry/lead-details.html", context)
 

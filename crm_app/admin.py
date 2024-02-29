@@ -6,6 +6,8 @@ from .models import *
 
 admin.site.register(CustomUser)
 admin.site.register(Notification)
+admin.site.register(VisaCategory)
+admin.site.register(Employee)
 
 # class VisaCountryResource(resources.ModelResource):
 #     class Meta:
