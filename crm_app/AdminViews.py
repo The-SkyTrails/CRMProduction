@@ -1604,7 +1604,10 @@ class PackageListView(LoginRequiredMixin, ListView):
     context_object_name = "Package"
 
     def get_queryset(self):
-        return Package.objects.filter(approval=True).order_by("-id")
+        test = Package.objects.filter(approval__in=[True])
+        print("testiiiiiiiii", test)
+        # print("packageeeeee",Package.objects.filter(approval__in=[True]).order_by("-id"))
+        return Package.objects.filter(approval__in=[True]).order_by("-id")
 
 
 class DisapprivePackageListView(LoginRequiredMixin, ListView):
@@ -1613,7 +1616,11 @@ class DisapprivePackageListView(LoginRequiredMixin, ListView):
     context_object_name = "Package"
 
     def get_queryset(self):
-        return Package.objects.filter(approval=False).order_by("-id")
+        print(
+            "gggggggggggggg",
+            Package.objects.filter(approval__in=[False]).order_by("-id"),
+        )
+        return Package.objects.filter(approval__in=[False]).order_by("-id")
 
 
 class editPackage(LoginRequiredMixin, UpdateView):
