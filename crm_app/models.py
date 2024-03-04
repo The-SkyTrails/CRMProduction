@@ -1083,16 +1083,16 @@ def session_deleted_handler(sender, instance, **kwargs):
         pass
 
 
-# @receiver(pre_delete, sender=Employee)
-# def delete_custom_user(sender, instance, **kwargs):
-#     # Disconnect the signal temporarily to avoid recursion
-#     pre_delete.disconnect(delete_custom_user, sender=Employee)
+@receiver(pre_delete, sender=Employee)
+def delete_custom_user(sender, instance, **kwargs):
+    # Disconnect the signal temporarily to avoid recursion
+    pre_delete.disconnect(delete_custom_user, sender=Employee)
 
-#     # Delete the associated CustomUser before deleting the Employee
-#     instance.users.delete()
+    # Delete the associated CustomUser before deleting the Employee
+    instance.users.delete()
 
-#     # Reconnect the signal
-#     pre_delete.connect(delete_custom_user, sender=Employee)
+    # Reconnect the signal
+    pre_delete.connect(delete_custom_user, sender=Employee)
 
 
 @receiver(post_save, sender=CustomUser)
