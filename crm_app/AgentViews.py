@@ -41,8 +41,8 @@ class agent_dashboard(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        enq_enrolled_count = 0
-        enq_count = 0
+        #     enq_enrolled_count = 0
+        #     enq_count = 0
 
         leadaccept_count = Enquiry.objects.filter(
             Q(lead_status="Enrolled")
@@ -55,118 +55,121 @@ class agent_dashboard(LoginRequiredMixin, TemplateView):
             created_by=self.request.user,
         ).count()
 
+        print("ggggggggggggg", leadaccept_count)
+
         lead_count = Enquiry.objects.filter(created_by=self.request.user).count()
 
-        package = Package.objects.filter(approval="True").order_by("-last_updated_on")[
-            :10
-        ]
+        # package = Package.objects.filter(approval="True").order_by("-last_updated_on")[
+        #     :10
+        # ]
 
-        url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
-        response = requests.get(url)
-        data = response.json()
-        webpackages = data["data"]["pakage"]
+        #     url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
+        #     response = requests.get(url)
+        #     data = response.json()
+        #     webpackages = data["data"]["pakage"]
 
-        for webpackage in webpackages:
-            webpackage["id"] = webpackage.pop("_id")
+        #     for webpackage in webpackages:
+        #         webpackage["id"] = webpackage.pop("_id")
 
-        story = SuccessStory.objects.all()
+        #     story = SuccessStory.objects.all()
 
-        user = self.request.user
-        faq_count = FAQ.objects.filter(user=user).count()
+        #     user = self.request.user
+        #     faq_count = FAQ.objects.filter(user=user).count()
 
-        if user.user_type == "4":
-            agent = Agent.objects.get(users=user)
-            latest_news = News.objects.filter(agent=True).order_by("-created_at")[:10]
-            context["agent"] = agent
-            context["latest_news"] = latest_news
-            enrolled_monthly_counts = (
-                Enquiry.objects.filter(
-                    Q(
-                        lead_status="Enrolled",
-                        assign_to_agent=user.agent,
-                    )
-                    | Q(lead_status="Enrolled", created_by=user)
-                )
-                .annotate(month=TruncMonth("registered_on"))
-                .values("month")
-                .annotate(count=Count("id"))
-                .order_by("month__month")
-            )
-            if enrolled_monthly_counts.exists():
-                enq_enrolled_count = enrolled_monthly_counts[0]["count"]
+        #     if user.user_type == "4":
+        #         agent = Agent.objects.get(users=user)
+        #         latest_news = News.objects.filter(agent=True).order_by("-created_at")[:10]
+        #         context["agent"] = agent
+        #         context["latest_news"] = latest_news
+        #         enrolled_monthly_counts = (
+        #             Enquiry.objects.filter(
+        #                 Q(
+        #                     lead_status="Enrolled",
+        #                     assign_to_agent=user.agent,
+        #                 )
+        #                 | Q(lead_status="Enrolled", created_by=user)
+        #             )
+        #             .annotate(month=TruncMonth("registered_on"))
+        #             .values("month")
+        #             .annotate(count=Count("id"))
+        #             .order_by("month__month")
+        #         )
+        #         if enrolled_monthly_counts.exists():
+        #             enq_enrolled_count = enrolled_monthly_counts[0]["count"]
 
-            all_enq = (
-                Enquiry.objects.filter(
-                    Q(assign_to_agent=user.agent) | Q(created_by=user)
-                )
-                .values(
-                    "id", "registered_on"
-                )  # Include the id to ensure distinct on Enquiry objects
-                .annotate(month=TruncMonth("registered_on"))
-                .values("month")
-                .annotate(
-                    count=Count("id", distinct=True)
-                )  # Count only distinct Enquiry objects
-                .order_by("month__month")
-            )
-            if all_enq.exists():
-                enq_count = all_enq[0]["count"]
+        #         all_enq = (
+        #             Enquiry.objects.filter(
+        #                 Q(assign_to_agent=user.agent) | Q(created_by=user)
+        #             )
+        #             .values(
+        #                 "id", "registered_on"
+        #             )  # Include the id to ensure distinct on Enquiry objects
+        #             .annotate(month=TruncMonth("registered_on"))
+        #             .values("month")
+        #             .annotate(
+        #                 count=Count("id", distinct=True)
+        #             )  # Count only distinct Enquiry objects
+        #             .order_by("month__month")
+        #         )
+        #         if all_enq.exists():
+        #             enq_count = all_enq[0]["count"]
 
-        if user.user_type == "5":
-            outagent = OutSourcingAgent.objects.get(users=user)
-            news = News.objects.filter(outsource_Agent=True).order_by("-created_at")[
-                :10
-            ]
-            context["agent"] = outagent
-            context["latest_news"] = news
+        #     if user.user_type == "5":
+        #         outagent = OutSourcingAgent.objects.get(users=user)
+        #         news = News.objects.filter(outsource_Agent=True).order_by("-created_at")[
+        #             :10
+        #         ]
+        #         context["agent"] = outagent
+        #         context["latest_news"] = news
 
-            enrolled_monthly_counts = (
-                Enquiry.objects.filter(
-                    Q(
-                        lead_status="Enrolled",
-                        assign_to_outsourcingagent=user.outsourcingagent,
-                    )
-                    | Q(lead_status="Enrolled", created_by=user)
-                )
-                .annotate(month=TruncMonth("registered_on"))
-                .values("month")
-                .annotate(count=Count("id"))
-                .order_by("month__month")
-            )
-            if enrolled_monthly_counts.exists():
-                enq_enrolled_count = enrolled_monthly_counts[0]["count"]
+        #         enrolled_monthly_counts = (
+        #             Enquiry.objects.filter(
+        #                 Q(
+        #                     lead_status="Enrolled",
+        #                     assign_to_outsourcingagent=user.outsourcingagent,
+        #                 )
+        #                 | Q(lead_status="Enrolled", created_by=user)
+        #             )
+        #             .annotate(month=TruncMonth("registered_on"))
+        #             .values("month")
+        #             .annotate(count=Count("id"))
+        #             .order_by("month__month")
+        #         )
+        #         if enrolled_monthly_counts.exists():
+        #             enq_enrolled_count = enrolled_monthly_counts[0]["count"]
 
-            all_enq = (
-                Enquiry.objects.filter(
-                    Q(assign_to_outsourcingagent=user.outsourcingagent)
-                    | Q(created_by=user)
-                )
-                .values(
-                    "id", "registered_on"
-                )  # Include the id to ensure distinct on Enquiry objects
-                .annotate(month=TruncMonth("registered_on"))
-                .values("month")
-                .annotate(
-                    count=Count("id", distinct=True)
-                )  # Count only distinct Enquiry objects
-                .order_by("month__month")
-            )
+        #         all_enq = (
+        #             Enquiry.objects.filter(
+        #                 Q(assign_to_outsourcingagent=user.outsourcingagent)
+        #                 | Q(created_by=user)
+        #             )
+        #             .values(
+        #                 "id", "registered_on"
+        #             )  # Include the id to ensure distinct on Enquiry objects
+        #             .annotate(month=TruncMonth("registered_on"))
+        #             .values("month")
+        #             .annotate(
+        #                 count=Count("id", distinct=True)
+        #             )  # Count only distinct Enquiry objects
+        #             .order_by("month__month")
+        #         )
 
-            if all_enq.exists():
-                enq_count = all_enq[0]["count"]
-        todo = Todo.objects.filter(user=self.request.user).order_by("-id")
+        #         if all_enq.exists():
+        #             enq_count = all_enq[0]["count"]
+        #     todo = Todo.objects.filter(user=self.request.user).order_by("-id")
 
-        context["leadaccept_count"] = leadaccept_count
+        #     context["leadaccept_count"] = leadaccept_count
         context["lead_count"] = lead_count
-        context["package"] = package
-        context["faq_count"] = faq_count
-        context["story"] = story
-        context["enrolled_monthly_counts"] = enrolled_monthly_counts
-        context["enq_enrolled_count"] = enq_enrolled_count
-        context["all_enq"] = all_enq
-        context["enq_count"] = enq_count
-        context["todo"] = todo
-        context["webpackages"] = webpackages
+
+        #     context["package"] = package
+        #     context["faq_count"] = faq_count
+        #     context["story"] = story
+        #     context["enrolled_monthly_counts"] = enrolled_monthly_counts
+        #     context["enq_enrolled_count"] = enq_enrolled_count
+        #     context["all_enq"] = all_enq
+        #     context["enq_count"] = enq_count
+        #     context["todo"] = todo
+        #     context["webpackages"] = webpackages
 
         return context
 
@@ -1088,6 +1091,7 @@ class PackageListView(LoginRequiredMixin, ListView):
     context_object_name = "Package"
 
     def get_queryset(self):
+
         return Package.objects.order_by("-id")
 
     def get_context_data(self, **kwargs):

@@ -17,10 +17,10 @@ def current_login(request):
             user = request.user
             agent_id = user.agent.id
             notification = Notification.objects.filter(
-                agent=agent_id, is_seen=False
+                agent=agent_id, is_seen__in=[False]
             ).order_by("-id")
             notification_Count = Notification.objects.filter(
-                agent=agent_id, is_seen=False
+                agent=agent_id, is_seen__in=[False]
             ).count()
 
             return {
@@ -47,10 +47,10 @@ def current_login(request):
             user = request.user
             emp_idd = user.employee.id
             notification = Notification.objects.filter(
-                employee=emp_idd, is_seen=False
+                employee=emp_idd, is_seen__in=[False]
             ).order_by("-id")
             notification_Count = Notification.objects.filter(
-                employee=user.employee, is_seen=False
+                employee=user.employee, is_seen__in=[False]
             ).count()
 
             return {
