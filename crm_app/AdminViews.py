@@ -70,9 +70,11 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         employee_count = Employee.objects.all().count()
 
         leadarchive_count = Enquiry.objects.filter(archive__in=[True]).count()
-        print("sssssssssssssss", leadarchive_count)
+        
+        
 
-        #     leadaccept_count = Enquiry.objects.filter(lead_status="Enrolled").count()
+        leadaccept_count = Enquiry.objects.filter(lead_status="Enrolled").count()
+        
 
         #     leadinprocess_count = Enquiry.objects.filter(
         #         Q(lead_status="Inprocess") | Q(lead_status="Ready To Submit")
@@ -84,18 +86,24 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
 
         #     completed_count = Enquiry.objects.filter(lead_status="Delivery").count()
 
-        #     leadpending_count = Enquiry.objects.filter(
-        #         Q(lead_status="Active") | Q(lead_status="PreEnrolled")
-        #     ).count()
+        leadpending_count = Enquiry.objects.filter(
+            Q(lead_status="Active") | Q(lead_status="PreEnrolled")
+        ).count()
+        
 
-        #     leadtotal_count = Enquiry.objects.all().count()
+        leadtotal_count = Enquiry.objects.all().count()
 
-        #     leadnew_count = Enquiry.objects.filter(lead_status="New Lead").count()
-        #     leadresult_count = Enquiry.objects.filter(lead_status="Result").count()
+        leadnew_count = Enquiry.objects.filter(lead_status="New Lead").count()
+        
+        leadresult_count = Enquiry.objects.filter(lead_status="Result").count()
 
-        #     package = Package.objects.filter(approval="True").order_by("-last_updated_on")[
-        #         :10
-        #     ]
+        # package = Package.objects.filter(approval__in=[True]).order_by("-last_updated_on")[
+        #     :10
+        # ]
+        package = Package.objects.filter(approval__in=[True]).order_by("-last_updated_on")[
+            :10
+        ]
+        
 
         #     url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
         #     response = requests.get(url)
@@ -105,11 +113,14 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         #     for webpackage in webpackages:
         #         webpackage["id"] = webpackage.pop("_id")
 
-        #     active_users = CustomUser.objects.filter(is_logged_in=True).count()
-        #     active_employee = CustomUser.objects.filter(user_type="3", is_logged_in=True)
-        #     active_agent = CustomUser.objects.filter(
-        #         user_type__in=["4", "5"], is_logged_in=True
-        #     )
+        active_users = CustomUser.objects.filter(is_logged_in__in=[True]).count()
+       
+        active_employee = CustomUser.objects.filter(user_type="3", is_logged_in__in=[True])
+        
+        active_agent = CustomUser.objects.filter(
+            user_type__in=["4", "5"], is_logged_in__in=[True]
+        )
+        
 
         #     story = SuccessStory.objects.all()
 
@@ -140,11 +151,11 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         context["total_agent_count"] = total_agent_count
         context["employee_count"] = employee_count
         #     context["leadarchive_count"] = leadarchive_count
-        #     context["leadaccept_count"] = leadaccept_count
-        #     context["leadpending_count"] = leadpending_count
-        #     context["leadtotal_count"] = leadtotal_count
-        #     context["leadnew_count"] = leadnew_count
-        #     context["package"] = package
+        context["leadaccept_count"] = leadaccept_count
+        context["leadpending_count"] = leadpending_count
+        context["leadtotal_count"] = leadtotal_count
+        context["leadnew_count"] = leadnew_count
+        context["package"] = package
         #     context["enrolled_monthly_counts"] = enrolled_monthly_counts
         #     context["all_enq"] = all_enq
         #     context["enq_count"] = enq_count
@@ -152,13 +163,13 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         #     context["story"] = story
         #     context["latest_news"] = latest_news
         #     context["todo"] = todo
-        #     context["active_users"] = active_users
-        #     context["active_employee"] = active_employee
-        #     context["active_agent"] = active_agent
+        context["active_users"] = active_users
+        context["active_employee"] = active_employee
+        context["active_agent"] = active_agent
         #     context["leadinprocess_count"] = leadinprocess_count
         #     context["leadappoint_count"] = leadappoint_count
         #     context["completed_count"] = completed_count
-        #     context["leadresult_count"] = leadresult_count
+        context["leadresult_count"] = leadresult_count
         #     context["webpackages"] = webpackages
 
         return context
@@ -1922,7 +1933,7 @@ class Enquiry3View(LoginRequiredMixin, CreateView):
             create_notification(enquiry.assign_to_employee, "New Enquiry Added")
 
             current_count = Notification.objects.filter(
-                is_seen=False, employee=enquiry.assign_to_employee
+                is_seen__in=[False], employee=enquiry.assign_to_employee
             ).count()
             try:
                 employee_id = enquiry.assign_to_employee.id

@@ -1323,7 +1323,7 @@ class AppointmentGridView(LoginRequiredMixin, ListView):
 class PackageCreateView(LoginRequiredMixin, CreateView):
     model = Package
     form_class = PackageForm
-    template_name = "Admin/Product/addproduct.html"
+    template_name = "Agent/Product/addproduct.html"
     success_url = reverse_lazy("Agent_Package_list")
 
     def form_valid(self, form):

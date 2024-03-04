@@ -711,7 +711,7 @@ class Enquiry(models.Model):
     registered_on = models.DateTimeField(auto_now_add=True, auto_now=False)
     case_id = models.CharField(max_length=15, unique=True, editable=False)
 
-    archive = models.BooleanField(null=True, blank=True, default=False)
+    archive = models.BooleanField(default=False)
 
     # --------------------- Color ----------------------------
 
