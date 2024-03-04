@@ -76,15 +76,21 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         leadaccept_count = Enquiry.objects.filter(lead_status="Enrolled").count()
         
 
-        #     leadinprocess_count = Enquiry.objects.filter(
-        #         Q(lead_status="Inprocess") | Q(lead_status="Ready To Submit")
-        #     ).count()
+        leadinprocess_count = Enquiry.objects.filter(
+            Q(lead_status="Inprocess") | Q(lead_status="Ready To Submit")
+        ).count()
 
-        #     leadappoint_count = Enquiry.objects.filter(
-        #         Q(lead_status="Appointment") | Q(lead_status="Ready To Collection")
-        #     ).count()
+        
+       
 
-        #     completed_count = Enquiry.objects.filter(lead_status="Delivery").count()
+        leadappoint_count = Enquiry.objects.filter(
+            Q(lead_status="Appointment") | Q(lead_status="Ready To Collection")
+        ).count()
+
+        print("lead appointment",leadappoint_count)
+
+        completed_count = Enquiry.objects.filter(lead_status="Delivery").count()
+        
 
         leadpending_count = Enquiry.objects.filter(
             Q(lead_status="Active") | Q(lead_status="PreEnrolled")
@@ -97,21 +103,20 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         
         leadresult_count = Enquiry.objects.filter(lead_status="Result").count()
 
-        # package = Package.objects.filter(approval__in=[True]).order_by("-last_updated_on")[
-        #     :10
-        # ]
-        package = Package.objects.filter(approval__in=[True]).order_by("-last_updated_on")[
+        package = Package.objects.filter(approval="Yes").order_by("-last_updated_on")[
             :10
         ]
         
+        
+        
 
-        #     url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
-        #     response = requests.get(url)
-        #     data = response.json()
-        #     webpackages = data["data"]["pakage"]
+        url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
+        response = requests.get(url)
+        data = response.json()
+        webpackages = data["data"]["pakage"]
 
-        #     for webpackage in webpackages:
-        #         webpackage["id"] = webpackage.pop("_id")
+        for webpackage in webpackages:
+            webpackage["id"] = webpackage.pop("_id")
 
         active_users = CustomUser.objects.filter(is_logged_in__in=[True]).count()
        
@@ -122,17 +127,18 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         )
         
 
-        #     story = SuccessStory.objects.all()
+        story = SuccessStory.objects.all()
 
-        #     latest_news = News.objects.order_by("-created_at")[:10]
-
-        #     enrolled_monthly_counts = (
-        #         Enquiry.objects.filter(lead_status="Enrolled")
-        #         .annotate(month=TruncMonth("registered_on"))
-        #         .values("month")
-        #         .annotate(count=Count("id"))
-        #         .order_by("month__month")
-        #     )
+        latest_news = News.objects.order_by("-created_at")[:10]
+       
+        # enrolled_monthly_counts = (
+        #     Enquiry.objects.filter(lead_status="Enrolled")
+        #     .annotate(month=TruncMonth("registered_on"))
+        #     .values("month")
+        #     .annotate(count=Count("id"))
+        #     .order_by("month__month")
+        # )
+        # print("okkkk",enrolled_monthly_counts)
         #     if enrolled_monthly_counts.exists():
         #         enq_enrolled_count = enrolled_monthly_counts[0]["count"]
 
@@ -143,7 +149,7 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         #         .annotate(count=Count("id"))
         #         .order_by("month__month")
         #     )
-        #     todo = Todo.objects.filter(user=self.request.user).order_by("-id")
+        todo = Todo.objects.filter(user=self.request.user).order_by("-id")
 
         #     if all_enq.exists():
         #         enq_count = all_enq[0]["count"]
@@ -156,21 +162,21 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         context["leadtotal_count"] = leadtotal_count
         context["leadnew_count"] = leadnew_count
         context["package"] = package
-        #     context["enrolled_monthly_counts"] = enrolled_monthly_counts
+        # context["enrolled_monthly_counts"] = enrolled_monthly_counts
         #     context["all_enq"] = all_enq
         #     context["enq_count"] = enq_count
         #     context["enq_enrolled_count"] = enq_enrolled_count
-        #     context["story"] = story
-        #     context["latest_news"] = latest_news
-        #     context["todo"] = todo
+        context["story"] = story
+        context["latest_news"] = latest_news
+        context["todo"] = todo
         context["active_users"] = active_users
         context["active_employee"] = active_employee
         context["active_agent"] = active_agent
-        #     context["leadinprocess_count"] = leadinprocess_count
-        #     context["leadappoint_count"] = leadappoint_count
-        #     context["completed_count"] = completed_count
+        context["leadinprocess_count"] = leadinprocess_count
+        context["leadappoint_count"] = leadappoint_count
+        context["completed_count"] = completed_count
         context["leadresult_count"] = leadresult_count
-        #     context["webpackages"] = webpackages
+        context["webpackages"] = webpackages
 
         return context
 
@@ -1559,7 +1565,7 @@ class PackageCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         try:
             form.instance.last_updated_by = self.request.user
-            form.instance.approval = "True"
+            form.instance.approval = "Yes"
             self.object = form.save()
             self.send_whatsapp_messages()
             self.send_email()
@@ -1615,10 +1621,8 @@ class PackageListView(LoginRequiredMixin, ListView):
     context_object_name = "Package"
 
     def get_queryset(self):
-        test = Package.objects.filter(approval__in=[True])
-        print("testiiiiiiiii", test)
         # print("packageeeeee",Package.objects.filter(approval__in=[True]).order_by("-id"))
-        return Package.objects.filter(approval__in=[True]).order_by("-id")
+        return Package.objects.filter(approval = "Yes").order_by("-id")
 
 
 class DisapprivePackageListView(LoginRequiredMixin, ListView):
@@ -1627,11 +1631,8 @@ class DisapprivePackageListView(LoginRequiredMixin, ListView):
     context_object_name = "Package"
 
     def get_queryset(self):
-        print(
-            "gggggggggggggg",
-            Package.objects.filter(approval__in=[False]).order_by("-id"),
-        )
-        return Package.objects.filter(approval__in=[False]).order_by("-id")
+        
+        return Package.objects.filter(approval = "No").order_by("-id")
 
 
 class editPackage(LoginRequiredMixin, UpdateView):
@@ -3601,7 +3602,7 @@ def admin_appointment_done(request, id):
 def approve_product(request, id):
     instance = get_object_or_404(Package, id=id)
 
-    instance.approval = True
+    instance.approval = "Yes"
     instance.save()
 
     send_whatsapp_messages(instance)
@@ -3658,7 +3659,7 @@ def get_contact_number(user):
 def disapprove_product(request, id):
     instance = get_object_or_404(Package, id=id)
 
-    instance.approval = False
+    instance.approval = "No"
     instance.save()
 
     return redirect("Package_list")

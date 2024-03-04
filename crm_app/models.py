@@ -402,7 +402,10 @@ PROCESSING_TIME_CHOICES = [
     ("6 Month", "6 Month"),
 ]
 
-
+CHOICES = [
+    ("Yes","Yes"),
+    ("No","No")
+]
 class Package(models.Model):
 
     visa_country = models.ForeignKey(
@@ -433,7 +436,7 @@ class Package(models.Model):
     processing_time = models.CharField(
         max_length=30, choices=PROCESSING_TIME_CHOICES, blank=True, null=True
     )
-    approval = models.BooleanField(default=False)
+    approval = models.CharField(max_length=10,choices=CHOICES,default="No")
 
     def __str__(self):
         return self.title

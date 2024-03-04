@@ -9,6 +9,7 @@ admin.site.register(Notification)
 admin.site.register(VisaCategory)
 admin.site.register(Employee)
 admin.site.register(Enquiry)
+admin.site.register(Package)
 
 # class VisaCountryResource(resources.ModelResource):
 #     class Meta:
