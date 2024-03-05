@@ -362,7 +362,7 @@ def resend_otp(request):
                         "number": mob,
                         "message": f"Use this OTP {send_otp} to login to your. theskytrails account",
                     }
-                    print("New OTp ", send_otp)
+                    
                     response = requests.post(url, data=payload)
                     return redirect("verify_otp")
 

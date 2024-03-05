@@ -302,4 +302,8 @@ urlpatterns = [
         admin_completed_leads_details,
         name="admin_completed_leads_details",
     ),
+    
+
+
+    
 ]

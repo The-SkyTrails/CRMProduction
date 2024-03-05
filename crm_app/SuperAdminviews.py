@@ -153,7 +153,7 @@ def edit_admin(request, user_id):
             return redirect("view_admin")
         except Exception as e:
             messages.warning(request, "Something went wrong. Please try again.")
-            print(e)
+            
 
     return render(
         request, "SuperAdmin/Admin Management/editadmin.html", {"admin": admin}

@@ -1561,7 +1561,7 @@ def emp_outsource_agent_kyc(request, id):
                 messages.success(request, "Kyc Added Successfully..")
                 return redirect("emp_outsource_agent_kyc", id)
             else:
-                print("workingggggggg")
+                pass
 
         except AgentKyc.DoesNotExist:
             kyc_id = None
@@ -3308,7 +3308,7 @@ class PackageCreateView(LoginRequiredMixin, CreateView):
             return super().form_valid(form)
         except Exception as e:
             messages.error(self.request, f"Error: {e}")
-            print("Error Occured ", e)
+            
             return self.form_invalid(form)
 
 
@@ -3351,9 +3351,9 @@ class SuccessStoryList(LoginRequiredMixin, ListView):
 
 
 def empPackageApply(request, id):
-    print("sssssssssssss")
+    
     if request.method == "POST":
-        print("worminggg")
+        
         package = Package.objects.get(id=id)
         package_id = package.id
         request.session["package_id"] = package_id
@@ -3648,7 +3648,7 @@ def emp_appointment(request):
 def all_appointment(request):
     user = request.user.employee
     all_events = Appointment.objects.filter(employee=user)
-    print("demooooooooooooo", all_events)
+    
     out = []
     for event in all_events:
         formatted_date = event.start.strftime("%Y-%m-%d")

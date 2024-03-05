@@ -66,7 +66,7 @@ def current_login(request):
 
             # notification_Count = Notification.objects.all().count()
             queryset = Notification.objects.filter(is_seen__in=[False]).count()
-            print(queryset)
+           
             if user:
                 pass
                 # queryset = Notification.objects.filter(is_seen=0).count()

@@ -50,7 +50,7 @@ from .notifications import (
 )
 
 ######################################### COUNTRY #################################################
-
+from collections import defaultdict
 
 class admin_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Admin/Dashboard/dashboard.html"
@@ -61,7 +61,7 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         enq_count = 0
         enq_enrolled_count = 0
         agent_count = Agent.objects.all().count()
-        print("agenn counttt", agent_count)
+        
 
         outsourceagent_count = OutSourcingAgent.objects.all().count()
 
@@ -87,7 +87,7 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
             Q(lead_status="Appointment") | Q(lead_status="Ready To Collection")
         ).count()
 
-        print("lead appointment",leadappoint_count)
+        
 
         completed_count = Enquiry.objects.filter(lead_status="Delivery").count()
         
@@ -106,6 +106,7 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         package = Package.objects.filter(approval="Yes").order_by("-last_updated_on")[
             :10
         ]
+       
         
         
         
@@ -130,7 +131,29 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         story = SuccessStory.objects.all()
 
         latest_news = News.objects.order_by("-created_at")[:10]
+        enquiries = Enquiry.objects.filter(lead_status="Enrolled")
+
+        # Perform manual date truncation and counting
+        
        
+        enrolled_monthly_counts = defaultdict(int)
+        for enquiry in enquiries:
+            
+             # Ensure enquiry.registered_on is a datetime object
+            if isinstance(enquiry.registered_on, str):
+                enquiry.registered_on = datetime.strptime(enquiry.registered_on, '%Y-%m-%d %H:%M:%S.%f')
+            
+            month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+            enrolled_monthly_counts[month_year] += 1
+
+        # Sort the results by month
+        sorted_counts = sorted(enrolled_monthly_counts.items())
+        print("gg",sorted_counts)
+        
+
+        context["sorted_counts "] = sorted_counts 
+
+        
         # enrolled_monthly_counts = (
         #     Enquiry.objects.filter(lead_status="Enrolled")
         #     .annotate(month=TruncMonth("registered_on"))
@@ -149,6 +172,7 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         #         .annotate(count=Count("id"))
         #         .order_by("month__month")
         #     )
+
         todo = Todo.objects.filter(user=self.request.user).order_by("-id")
 
         #     if all_enq.exists():
@@ -283,7 +307,7 @@ def add_visacategory(request):
                 )
                 return redirect("add_visacategory")
 
-                print("heloooooooooooo")
+                
             # if VisaCategory.objects.filter(
             #     Q(
             #         category=category,
@@ -829,7 +853,7 @@ def add_employee(request):
         authorization = request.POST.get("authorization")
         tata_tele_agent_no = request.POST.get("tata_tele_agent_no")
         files = request.FILES.get("file")
-        print("workinggggggggggggg", emp_code)
+        
 
         if not branch_id:
             messages.warning(request, "Branch ID is required")
@@ -876,7 +900,7 @@ def add_employee(request):
         # user.users = new_customuser_id
         user.save()
 
-        print("tryyyyyyyyy catchhhhhhhhh")
+        
 
         send_congratulatory_email(firstname, lastname, email, password, user_type="3")
         messages.success(
@@ -3948,7 +3972,7 @@ def update(request):
     end = request.GET.get("end", None)
     title = request.GET.get("title", None)
     id = request.GET.get("id", None)
-    print("ssssssssssssss", id)
+    
     event = Appointment.objects.get(id=id)
     event.start = start
     event.name = title
@@ -4445,3 +4469,6 @@ def admin_completed_leads_details(request):
         "lead": lead,
     }
     return render(request, "Admin/Enquiry/statusleads/completeleads.html", context)
+
+
+

@@ -18,7 +18,7 @@ response = requests.get(url)
 if response.status_code == 200:
     # The API call was successful, and you can access the data using response.json()
     data = response.json()
-    print(data)
+    
 else:
     # The API call failed, and you can print the status code and any error message
-    print(f"Error: {response.status_code}, {response.text}")
+    pass

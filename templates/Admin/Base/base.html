@@ -137,62 +137,9 @@
       });
     });
   </script>
-  {% comment %} <script>
-  
-    const enrolledData = [
-        {% for entry in enrolled_monthly_counts %}
-        
-            { month: '{{ entry.month__month__name }}', enrolled: {{ entry.count }} },
-        {% endfor %}
-    ];
-
-    const allEnqData = [
-        {% for entry in all_enq %}
-            { month: '{{ entry.month__month__name }}', completed: {{ entry.count }} },
-        {% endfor %}
-    ];
-
-    const verticalChartCanvas = document.getElementById('chartjs-bar');
-    const verticalChart = new Chart(verticalChartCanvas, {
-        type: 'bar',
-        data: {
-            labels: enrolledData.map(data => data.month),
-            datasets: [
-                {
-                    label: 'Enrolled',
-                    backgroundColor: '#1A56DB',
-                    borderColor: '#1A56DB',
-                    borderWidth: 1,
-                    data: enrolledData.map(data => data.enrolled),
-                },
-                {
-                    label: 'All Enquiries',
-                    backgroundColor: '#2DC48B',
-                    borderColor: '#2DC48B',
-                    borderWidth: 1,
-                    data: allEnqData.map(data => data.completed),
-                },
-            ],
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Number of Enquiries',
-                    },
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Month',
-                    },
-                },
-            },
-        },
-    });
-</script> {% endcomment %}
+ 
+ 
+ 
 
 <script>
     const enrolledData = [
@@ -247,7 +194,7 @@
             },
         },
     });
-</script>
+</script> 
 <script src="https://unpkg.com/emojionearea@3.4.2/dist/emojionearea.min.js"></script>
 
 {% comment %} ---------------------------------------- WebSocket Connection for Notification --------------- {% endcomment %}
