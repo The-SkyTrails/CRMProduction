@@ -69,15 +69,16 @@ def employee_followup_list(request):
 class employee_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Employee/Dashboard/dashboard.html"
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     enq_count = 0
-    #     enq_enrolled_count = 0
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        enq_count = 0
+        enq_enrolled_count = 0
 
-    #     agent_count = Agent.objects.filter(
-    #         Q(registerdby=self.request.user)
-    #         | Q(assign_employee=self.request.user.employee)
-    #     ).count
+        agent_count = Agent.objects.filter(
+            Q(registerdby=self.request.user)
+            | Q(assign_employee=self.request.user.employee)
+        ).count
+       
 
     #     outsourceagent_count = OutSourcingAgent.objects.filter(
     #         registerdby=self.request.user
@@ -289,7 +290,8 @@ class employee_dashboard(LoginRequiredMixin, TemplateView):
     #     context["dep"] = dep
 
     #     context["package"] = package
-    #     context["agent_count"] = agent_count
+        context["agent_count"] = agent_count
+        
     #     context["outsourceagent_count"] = outsourceagent_count
     #     context["enrolled_monthly_counts"] = enrolled_monthly_counts
     #     context["all_enq"] = all_enq
@@ -307,7 +309,7 @@ class employee_dashboard(LoginRequiredMixin, TemplateView):
 
     #     # context["enq_count"] = enq_count
 
-    #     return context
+        return context
 
 
 class emp_Enquiry1View(LoginRequiredMixin, CreateView):
