@@ -80,39 +80,39 @@ class employee_dashboard(LoginRequiredMixin, TemplateView):
         ).count
        
 
-    #     outsourceagent_count = OutSourcingAgent.objects.filter(
-    #         registerdby=self.request.user
-    #     ).count
+        outsourceagent_count = OutSourcingAgent.objects.filter(
+            registerdby=self.request.user
+        ).count
 
-    #     package = Package.objects.filter(approval="Yes").order_by("-last_updated_on")[
-    #         :10
-    #     ]
+        package = Package.objects.filter(approval="Yes").order_by("-last_updated_on")[
+            :10
+        ]
 
-    #     url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
-    #     response = requests.get(url)
-    #     data = response.json()
-    #     webpackages = data["data"]["pakage"]
+        url = "https://back.theskytrails.com/skyTrails/packages/getAllcrm"
+        response = requests.get(url)
+        data = response.json()
+        webpackages = data["data"]["pakage"]
 
-    #     for webpackage in webpackages:
-    #         webpackage["id"] = webpackage.pop("_id")
+        for webpackage in webpackages:
+            webpackage["id"] = webpackage.pop("_id")
 
-    #     active_users = CustomUser.objects.filter(is_logged_in__in=[True]).count()
-    #     active_employee = CustomUser.objects.filter(user_type="3", is_logged_in=True)
-    #     active_agent = CustomUser.objects.filter(
-    #         user_type__in=["4", "5"], is_logged_in=True
-    #     )
+        active_users = CustomUser.objects.filter(is_logged_in__in=[True]).count()
+        active_employee = CustomUser.objects.filter(user_type="3", is_logged_in__in=[True])
+        active_agent = CustomUser.objects.filter(
+            user_type__in=["4", "5"], is_logged_in__in=[True]
+        )
 
-    #     story = SuccessStory.objects.all()
-    #     latest_news = News.objects.filter(employee__in=[True]).order_by("-created_at")[:10]
+        story = SuccessStory.objects.all()
+        latest_news = News.objects.filter(employee__in=[True]).order_by("-created_at")[:10]
 
-    #     user = self.request.user
-    #     if user.user_type == "4":
-    #         agent = Agent.objects.get(users=user)
-    #         context["agent"] = agent
+        user = self.request.user
+        if user.user_type == "4":
+            agent = Agent.objects.get(users=user)
+            context["agent"] = agent
 
-    #     if user.user_type == "5":
-    #         outagent = OutSourcingAgent.objects.get(users=user)
-    #         context["agent"] = outagent
+        if user.user_type == "5":
+            outagent = OutSourcingAgent.objects.get(users=user)
+            context["agent"] = outagent
 
     #     dep = user.employee.department
 
@@ -289,23 +289,23 @@ class employee_dashboard(LoginRequiredMixin, TemplateView):
     #     todo = Todo.objects.filter(user=self.request.user).order_by("-id")
     #     context["dep"] = dep
 
-    #     context["package"] = package
+        context["package"] = package
         context["agent_count"] = agent_count
         
-    #     context["outsourceagent_count"] = outsourceagent_count
+        context["outsourceagent_count"] = outsourceagent_count
     #     context["enrolled_monthly_counts"] = enrolled_monthly_counts
     #     context["all_enq"] = all_enq
     #     context["enq_count"] = enq_count
     #     context["enq_enrolled_count"] = enq_enrolled_count
-    #     context["story"] = story
-    #     context["latest_news"] = latest_news
+        context["story"] = story
+        context["latest_news"] = latest_news
     #     context["todo"] = todo
     #     context["data"] = data
-    #     context["active_users"] = active_users
-    #     context["active_employee"] = active_employee
-    #     context["active_agent"] = active_agent
+        context["active_users"] = active_users
+        context["active_employee"] = active_employee
+        context["active_agent"] = active_agent
 
-    #     context["webpackages"] = webpackages
+        context["webpackages"] = webpackages
 
     #     # context["enq_count"] = enq_count
 
