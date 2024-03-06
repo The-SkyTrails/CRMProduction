@@ -123,7 +123,75 @@
       });
     });
   </script>
- 
+
+
+<script>
+    const enrolledData = [
+        {% for entry in enrolled_months %}
+            '{{ entry }}',
+        {% endfor %}
+    ];
+
+    const enrolledcount = [
+        {% for entrycount in enrolled_counts %}
+            '{{ entrycount }}',
+        {% endfor %}
+    ];
+
+    const allEnqData = [
+        {% for entry in all_months %}
+            '{{ entry }}',
+        {% endfor %}
+    ];
+
+    const enquirycount = [
+        {% for enquirycount in all_counts %}
+            '{{ enquirycount }}',
+        {% endfor %}
+    ];
+
+    const verticalChartCanvas = document.getElementById('chartjs-bar');
+    const verticalChart = new Chart(verticalChartCanvas, {
+        type: 'bar',
+        data: {
+            labels: allEnqData,
+            datasets: [
+                {
+                    label: 'All Leads',
+                    backgroundColor: '#1A56DB',
+                    borderColor: '#1A56DB',
+                    borderWidth: 1,
+                    data: enquirycount,
+                },
+                {
+                    label: 'Enrolled Leads',
+                    backgroundColor: '#2DC48B',
+                    borderColor: '#2DC48B',
+                    borderWidth: 1,
+                    data: enrolledcount,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Enquiries',
+                    },
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month',
+                    },
+                },
+            },
+        },
+    }); 
+</script>
+{% comment %}  
 <script>
     const enrolledData = [
         {% for entry in enrolled_monthly_counts %}
@@ -177,7 +245,7 @@
             },
         },
     });
-</script>
+</script> {% endcomment %}
 
 {{ agent_id|json_script:"agent" }}
 

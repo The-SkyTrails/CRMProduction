@@ -34,7 +34,7 @@ from .notifications import (
     create_admin_notification,
     send_notification_admin,
 )
-
+from collections import defaultdict
 
 class agent_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Agent/Dashboard/dashboard.html"
@@ -81,98 +81,102 @@ class agent_dashboard(LoginRequiredMixin, TemplateView):
         context["faq_count"] = faq_count
 
         if user.user_type == "4":
+            enrolled_monthly_counts = defaultdict(int)
+            all_enquiries_monthly_counts = defaultdict(int)
             agent = Agent.objects.get(users=user)
             latest_news = News.objects.filter(agent__in=[True]).order_by("-created_at")[:10]
-            context["agent"] = agent
-            context["latest_news"] = latest_news
-        if user.user_type == "5":
-            outagent = OutSourcingAgent.objects.get(users=user)
-            news = News.objects.filter(outsource_Agent__in=[True]).order_by("-created_at")[
-                :10
-            ]
-            context["agent"] = outagent
-            context["latest_news"] = news
-            
-            
-            enrolled_monthly_counts = (
-                Enquiry.objects.filter(
+
+            enrolled_monthly_enquiries =  Enquiry.objects.filter(
                     Q(
                         lead_status="Enrolled",
                         assign_to_agent=user.agent,
                     )
                     | Q(lead_status="Enrolled", created_by=user)
                 )
-                .annotate(month=TruncMonth("registered_on"))
-                .values("month")
-                .annotate(count=Count("id"))
-                .order_by("month__month")
-            )
-            if enrolled_monthly_counts.exists():
-                enq_enrolled_count = enrolled_monthly_counts[0]["count"]
-                context["enrolled_monthly_counts"] = enrolled_monthly_counts
-                context["enq_enrolled_count"] = enq_enrolled_count
-
-            all_enq = (
-                Enquiry.objects.filter(
+            
+            all_monthly_enquiries =   Enquiry.objects.filter(
                     Q(assign_to_agent=user.agent) | Q(created_by=user)
                 )
-                .values(
-                    "id", "registered_on"
-                ) 
-                .annotate(month=TruncMonth("registered_on"))
-                .values("month")
-                .annotate(
-                    count=Count("id", distinct=True)
-                )
-                .order_by("month__month")
-            )
-            if all_enq.exists():
-                enq_count = all_enq[0]["count"]
-                context["all_enq"] = all_enq
-                context["enq_count"] = enq_count
+            
+            for enquiry in enrolled_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                enrolled_monthly_counts[month_year] += 1
 
-        
+            for enquiry in all_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                all_enquiries_monthly_counts[month_year] += 1
 
-            enrolled_monthly_counts = (
-                Enquiry.objects.filter(
+            sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+            enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+            enrolled_counts = [count for _, count in sorted_enrolled_counts]
+            
+            sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+            all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+            all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+            
+            enq_count = sum(all_counts)
+            enq_enrolled_count = sum(enrolled_counts)
+
+            context["agent"] = agent
+            context["latest_news"] = latest_news
+            context["enrolled_months"] = enrolled_months
+            context["enrolled_counts"] = enrolled_counts
+            context["all_months"] = all_months
+            context["all_counts"] = all_counts
+            context["enq_count"] = enq_count
+            context["enq_enrolled_count"] = enq_enrolled_count
+
+
+
+        if user.user_type == "5":
+            outagent = OutSourcingAgent.objects.get(users=user)
+            news = News.objects.filter(outsource_Agent__in=[True]).order_by("-created_at")[
+                :10
+            ]
+
+            todo = Todo.objects.filter(user=self.request.user).order_by("-id")
+
+            enrolled_monthly_enquiries = Enquiry.objects.filter(
                     Q(
                         lead_status="Enrolled",
                         assign_to_outsourcingagent=user.outsourcingagent,
                     )
                     | Q(lead_status="Enrolled", created_by=user)
                 )
-                .annotate(month=TruncMonth("registered_on"))
-                .values("month")
-                .annotate(count=Count("id"))
-                .order_by("month__month")
-            )
-            if enrolled_monthly_counts.exists():
-                enq_enrolled_count = enrolled_monthly_counts[0]["count"]
-                context["enrolled_monthly_counts"] = enrolled_monthly_counts
-                context["enq_enrolled_count"] = enq_enrolled_count
-
-            all_enq = (
-                Enquiry.objects.filter(
+            
+            all_monthly_enquiries =   Enquiry.objects.filter(
                     Q(assign_to_outsourcingagent=user.outsourcingagent)
                     | Q(created_by=user)
                 )
-                .values(
-                    "id", "registered_on"
-                )
-                .annotate(month=TruncMonth("registered_on"))
-                .values("month")
-                .annotate(
-                    count=Count("id", distinct=True)
-                )
-                .order_by("month__month")
-            )
+            
+            for enquiry in enrolled_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                enrolled_monthly_counts[month_year] += 1
 
-            if all_enq.exists():
-                enq_count = all_enq[0]["count"]
-                context["all_enq"] = all_enq
-                context["enq_count"] = enq_count
-                
-            todo = Todo.objects.filter(user=self.request.user).order_by("-id")
+            for enquiry in all_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                all_enquiries_monthly_counts[month_year] += 1
+
+            sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+            enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+            enrolled_counts = [count for _, count in sorted_enrolled_counts]
+            
+            sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+            all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+            all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+            
+            enq_count = sum(all_counts)
+            enq_enrolled_count = sum(enrolled_counts)
+            context["agent"] = outagent
+            context["latest_news"] = news
+            context["enrolled_months"] = enrolled_months
+            context["enrolled_counts"] = enrolled_counts
+            context["all_months"] = all_months
+            context["all_counts"] = all_counts
+            context["enq_count"] = enq_count
+            context["enq_enrolled_count"] = enq_enrolled_count
+            
+             
             context["todo"] = todo
 
         return context
