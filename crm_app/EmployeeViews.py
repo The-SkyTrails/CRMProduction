@@ -64,7 +64,8 @@ def employee_followup_list(request):
 
 
 # ----------------------------------------------------------------
-
+from django.db.models import Func, F, Value, CharField
+from collections import defaultdict
 
 class employee_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Employee/Dashboard/dashboard.html"
@@ -114,163 +115,222 @@ class employee_dashboard(LoginRequiredMixin, TemplateView):
             outagent = OutSourcingAgent.objects.get(users=user)
             context["agent"] = outagent
 
-    #     dep = user.employee.department
+        dep = user.employee.department
+        enrolled_monthly_counts = defaultdict(int)
+        sorted_enrolled_counts = 0
+        if dep == "Presales":
+            enrolled_enquiries =Enquiry.objects.filter(
+                    Q(lead_status="Enrolled", assign_to_employee=user.employee)
+                    | Q(lead_status="Enrolled", created_by=user)
+                )
+            for enquiry in enrolled_enquiries:
+                if isinstance(enquiry.registered_on, str):
+                    enquiry.registered_on = datetime.strptime(enquiry.registered_on, '%Y-%m-%d %H:%M:%S.%f')
 
-    #     if dep == "Presales":
-    #         enrolled_monthly_counts = (
-    #             Enquiry.objects.filter(
-    #                 Q(lead_status="Enrolled", assign_to_employee=user.employee)
-    #                 | Q(lead_status="Enrolled", created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if enrolled_monthly_counts.exists():
-    #             enq_enrolled_count = enrolled_monthly_counts[0]["count"]
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                enrolled_monthly_counts[month_year] += 1
 
-    #         all_enq = (
-    #             Enquiry.objects.filter(
-    #                 Q(assign_to_employee=user.employee) | Q(created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if all_enq.exists():
-    #             enq_count = all_enq[0]["count"]
+            all_enquiries = Enquiry.objects.filter(
+                    Q(assign_to_employee=user.employee) | Q(created_by=user)
+                )
+        
+           
+            all_enquiries_monthly_counts = defaultdict(int)
+            for enquiry in all_enquiries:
+                if isinstance(enquiry.registered_on, str):
+                    enquiry.registered_on = datetime.strptime(enquiry.registered_on, '%Y-%m-%d %H:%M:%S.%f')
 
-    #     elif dep == "Sales":
-    #         enrolled_monthly_counts = (
-    #             Enquiry.objects.filter(
-    #                 Q(lead_status="Enrolled", assign_to_sales_employee=user.employee)
-    #                 | Q(lead_status="Enrolled", created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if enrolled_monthly_counts.exists():
-    #             enq_enrolled_count = enrolled_monthly_counts[0]["count"]
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                all_enquiries_monthly_counts[month_year] += 1
 
-    #         all_enq = (
-    #             Enquiry.objects.filter(
-    #                 Q(assign_to_sales_employee=user.employee) | Q(created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if all_enq.exists():
-    #             enq_count = all_enq[0]["count"]
+            sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+            enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+            enrolled_counts = [count for _, count in sorted_enrolled_counts]
+            sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+            
+            all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+            all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+            
+            enq_count = sum(all_counts)
+            enq_enrolled_count = sum(enrolled_counts)
+           
+      
+        elif dep == "Sales":
+            enrolled_monthly_counts = defaultdict(int)
+            all_enquiries_monthly_counts = defaultdict(int)
+            
+            enrolled_monthly_enquiries = Enquiry.objects.filter(
+                Q(lead_status="Enrolled", assign_to_sales_employee=user.employee)
+                | Q(lead_status="Enrolled", created_by=user)
+            )
+            
+            all_monthly_enquiries = Enquiry.objects.filter(
+                Q(assign_to_sales_employee=user.employee) | Q(created_by=user)
+            )
+            
+            for enquiry in enrolled_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                enrolled_monthly_counts[month_year] += 1
 
-    #     elif dep == "Documentation":
-    #         enrolled_monthly_counts = (
-    #             Enquiry.objects.filter(
-    #                 Q(
-    #                     lead_status="Enrolled",
-    #                     assign_to_documentation_employee=user.employee,
-    #                 )
-    #                 | Q(lead_status="Enrolled", created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if enrolled_monthly_counts.exists():
-    #             enq_enrolled_count = enrolled_monthly_counts[0]["count"]
+            for enquiry in all_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                all_enquiries_monthly_counts[month_year] += 1
 
-    #         all_enq = (
-    #             Enquiry.objects.filter(
-    #                 Q(assign_to_documentation_employee=user.employee)
-    #                 | Q(created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if all_enq.exists():
-    #             enq_count = all_enq[0]["count"]
+            sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+            enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+            enrolled_counts = [count for _, count in sorted_enrolled_counts]
+            
+            sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+            all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+            all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+            
+            enq_count = sum(all_counts)
+            enq_enrolled_count = sum(enrolled_counts)
 
-    #     elif dep == "HR":
-    #         enrolled_monthly_counts = (
-    #             Enquiry.objects.filter(
-    #                 Q(
-    #                     lead_status="Enrolled",
-    #                     assign_to_documentation_employee=user.employee,
-    #                 )
-    #                 | Q(lead_status="Enrolled", created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if enrolled_monthly_counts.exists():
-    #             enq_enrolled_count = enrolled_monthly_counts[0]["count"]
+                    
+        elif dep == "Documentation":
+            enrolled_monthly_counts = defaultdict(int)
+            all_enquiries_monthly_counts = defaultdict(int)
+            
+            enrolled_monthly_enquiries = Enquiry.objects.filter(
+                    Q(
+                        lead_status="Enrolled",
+                        assign_to_documentation_employee=user.employee,
+                    )
+                    | Q(lead_status="Enrolled", created_by=user)
+                )
+            
+            all_monthly_enquiries =  Enquiry.objects.filter(
+                    Q(assign_to_documentation_employee=user.employee)
+                    | Q(created_by=user)
+                )
+            
+            for enquiry in enrolled_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                enrolled_monthly_counts[month_year] += 1
 
-    #         all_enq = (
-    #             Enquiry.objects.filter(
-    #                 Q(assign_to_documentation_employee=user.employee)
-    #                 | Q(created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if all_enq.exists():
-    #             enq_count = all_enq[0]["count"]
+            for enquiry in all_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                all_enquiries_monthly_counts[month_year] += 1
 
-    #     elif dep == "Visa Team":
-    #         enrolled_monthly_counts = (
-    #             Enquiry.objects.filter(
-    #                 Q(
-    #                     lead_status="Enrolled",
-    #                     assign_to_visa_team_employee=user.employee,
-    #                 )
-    #                 | Q(lead_status="Enrolled", created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if enrolled_monthly_counts.exists():
-    #             enq_enrolled_count = enrolled_monthly_counts[0]["count"]
+            sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+            enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+            enrolled_counts = [count for _, count in sorted_enrolled_counts]
+            
+            sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+            all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+            all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+            
+            enq_count = sum(all_counts)
+            enq_enrolled_count = sum(enrolled_counts)
 
-    #         all_enq = (
-    #             Enquiry.objects.filter(
-    #                 Q(assign_to_visa_team_employee=user.employee) | Q(created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
-    #         if all_enq.exists():
-    #             enq_count = all_enq[0]["count"]
+        elif dep == "HR":
+            enrolled_monthly_counts = defaultdict(int)
+            all_enquiries_monthly_counts = defaultdict(int)
+            
+            enrolled_monthly_enquiries = Enquiry.objects.filter(
+                    Q(
+                        lead_status="Enrolled",
+                        assign_to_documentation_employee=user.employee,
+                    )
+                    | Q(lead_status="Enrolled", created_by=user)
+                )
+            
+            all_monthly_enquiries =  Enquiry.objects.filter(
+                    Q(assign_to_documentation_employee=user.employee)
+                    | Q(created_by=user)
+                )
+            
+            for enquiry in enrolled_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                enrolled_monthly_counts[month_year] += 1
 
-    #     elif dep == "Assesment":
-    #         enrolled_monthly_counts = (
-    #             Enquiry.objects.filter(
-    #                 Q(
-    #                     lead_status="Enrolled",
-    #                     assign_to_assesment_employee=user.employee,
-    #                 )
-    #                 | Q(lead_status="Enrolled", created_by=user)
-    #             )
-    #             .annotate(month=TruncMonth("registered_on"))
-    #             .values("month")
-    #             .annotate(count=Count("id"))
-    #             .order_by("month__month")
-    #         )
+            for enquiry in all_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                all_enquiries_monthly_counts[month_year] += 1
+
+            sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+            enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+            enrolled_counts = [count for _, count in sorted_enrolled_counts]
+            
+            sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+            all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+            all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+            
+            enq_count = sum(all_counts)
+            enq_enrolled_count = sum(enrolled_counts)
+
+    
+        elif dep == "Visa Team":
+            enrolled_monthly_counts = defaultdict(int)
+            all_enquiries_monthly_counts = defaultdict(int)
+            
+            enrolled_monthly_enquiries = Enquiry.objects.filter(
+                    Q(
+                        lead_status="Enrolled",
+                        assign_to_visa_team_employee=user.employee,
+                    )
+                    | Q(lead_status="Enrolled", created_by=user)
+                )
+            
+            all_monthly_enquiries =  Enquiry.objects.filter(
+                    Q(assign_to_visa_team_employee=user.employee) | Q(created_by=user)
+                )
+            
+            for enquiry in enrolled_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                enrolled_monthly_counts[month_year] += 1
+
+            for enquiry in all_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                all_enquiries_monthly_counts[month_year] += 1
+
+            sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+            enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+            enrolled_counts = [count for _, count in sorted_enrolled_counts]
+            
+            sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+            all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+            all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+            
+            enq_count = sum(all_counts)
+            enq_enrolled_count = sum(enrolled_counts)
+
+        elif dep == "Assesment":
+            enrolled_monthly_counts = defaultdict(int)
+            all_enquiries_monthly_counts = defaultdict(int)
+            
+            enrolled_monthly_enquiries = Enquiry.objects.filter(
+                    Q(
+                        lead_status="Enrolled",
+                        assign_to_assesment_employee=user.employee,
+                    )
+                    | Q(lead_status="Enrolled", created_by=user)
+                )
+            
+            all_monthly_enquiries =   Enquiry.objects.filter(
+                    Q(assign_to_assesment_employee=user.employee) | Q(created_by=user)
+                )
+            
+            for enquiry in enrolled_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                enrolled_monthly_counts[month_year] += 1
+
+            for enquiry in all_monthly_enquiries:
+                month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+                all_enquiries_monthly_counts[month_year] += 1
+
+            sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+            enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+            enrolled_counts = [count for _, count in sorted_enrolled_counts]
+            
+            sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+            all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+            all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+            
+            enq_count = sum(all_counts)
+            enq_enrolled_count = sum(enrolled_counts)
+
     #         if enrolled_monthly_counts:
     #             enq_enrolled_count = enrolled_monthly_counts[0]["count"]
 
@@ -286,7 +346,7 @@ class employee_dashboard(LoginRequiredMixin, TemplateView):
     #         if all_enq.exists():
     #             enq_count = all_enq[0]["count"]
 
-    #     todo = Todo.objects.filter(user=self.request.user).order_by("-id")
+        todo = Todo.objects.filter(user=self.request.user).order_by("-id")
     #     context["dep"] = dep
 
         context["package"] = package
@@ -295,19 +355,23 @@ class employee_dashboard(LoginRequiredMixin, TemplateView):
         context["outsourceagent_count"] = outsourceagent_count
     #     context["enrolled_monthly_counts"] = enrolled_monthly_counts
     #     context["all_enq"] = all_enq
-    #     context["enq_count"] = enq_count
-    #     context["enq_enrolled_count"] = enq_enrolled_count
+        context["enq_count"] = enq_count
+        context["enq_enrolled_count"] = enq_enrolled_count
         context["story"] = story
         context["latest_news"] = latest_news
-    #     context["todo"] = todo
-    #     context["data"] = data
+        context["todo"] = todo
+        context["data"] = data
         context["active_users"] = active_users
         context["active_employee"] = active_employee
         context["active_agent"] = active_agent
 
         context["webpackages"] = webpackages
+        context["enrolled_months"] = enrolled_months
+        context["enrolled_counts"] = enrolled_counts
+        context["all_months"] = all_months
+        context["all_counts"] = all_counts
 
-    #     # context["enq_count"] = enq_count
+       
 
         return context
 
@@ -445,7 +509,7 @@ class emp_Enquiry3View(LoginRequiredMixin, CreateView):
 
             create_admin_notification("New Lead Added")
 
-            current_count = Notification.objects.filter(is_seen=False).count()
+            current_count = Notification.objects.filter(is_seen__in=[False]).count()
             send_notification_admin("New Lead Added", current_count)
 
             messages.success(request, "Enquiry Added successfully")
@@ -758,7 +822,7 @@ def preenrolled_save(request, id):
         create_notification(enquiry.assign_to_sales_employee, "New Lead Assign Added")
 
         current_count = Notification.objects.filter(
-            is_seen=False, employee=enquiry.assign_to_sales_employee
+            is_seen__in=[False], employee=enquiry.assign_to_sales_employee
         ).count()
 
         employee_id = enquiry.assign_to_sales_employee.id

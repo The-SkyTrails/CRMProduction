@@ -50,7 +50,68 @@ from .notifications import (
 )
 
 ######################################### COUNTRY #################################################
+
+
 from collections import defaultdict
+from datetime import datetime  # Import datetime directly
+
+# class admin_dashboard(LoginRequiredMixin, TemplateView):
+#     template_name = "Admin/Dashboard/dashboard.html"
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+
+#         # Query all enrolled enquiries
+#         enrolled_enquiries = Enquiry.objects.filter(lead_status="Enrolled")
+
+#         # Initialize defaultdict to count enrolled enquiries per month
+#         enrolled_monthly_counts = defaultdict(int)
+
+#         # Iterate over enrolled enquiries to count them per month
+#         for enquiry in enrolled_enquiries:
+#             if isinstance(enquiry.registered_on, str):
+#                 enquiry.registered_on = datetime.strptime(enquiry.registered_on, '%Y-%m-%d %H:%M:%S.%f')
+
+#             month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+#             enrolled_monthly_counts[month_year] += 1
+
+#         # Query all enquiries
+#         all_enquiries = Enquiry.objects.all()
+
+#         # Initialize defaultdict to count all enquiries per month
+#         all_enquiries_monthly_counts = defaultdict(int)
+
+#         # Iterate over all enquiries to count them per month
+#         for enquiry in all_enquiries:
+#             if isinstance(enquiry.registered_on, str):
+#                 enquiry.registered_on = datetime.strptime(enquiry.registered_on, '%Y-%m-%d %H:%M:%S.%f')
+
+#             month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+#             all_enquiries_monthly_counts[month_year] += 1
+
+#         # Sort the results by month for enrolled enquiries
+#         sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+
+#         # Extracting month names and counts for enrolled enquiries
+#         enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+#         enrolled_counts = [count for _, count in sorted_enrolled_counts]
+
+#         # Sort the results by month for all enquiries
+#         sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+
+#         # Extracting month names and counts for all enquiries
+#         all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+#         all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+#         print(enrolled_counts)
+#         context["enrolled_months"] = enrolled_months
+#         context["enrolled_counts"] = enrolled_counts
+#         context["all_months"] = all_months
+#         context["all_counts"] = all_counts
+
+#         return context
+
+
+
 
 class admin_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Admin/Dashboard/dashboard.html"
@@ -136,24 +197,52 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         # Perform manual date truncation and counting
         
        
+        enrolled_enquiries = Enquiry.objects.filter(lead_status="Enrolled")
+
+        # Initialize defaultdict to count enrolled enquiries per month
         enrolled_monthly_counts = defaultdict(int)
-        for enquiry in enquiries:
-            
-             # Ensure enquiry.registered_on is a datetime object
+
+        # Iterate over enrolled enquiries to count them per month
+        for enquiry in enrolled_enquiries:
             if isinstance(enquiry.registered_on, str):
                 enquiry.registered_on = datetime.strptime(enquiry.registered_on, '%Y-%m-%d %H:%M:%S.%f')
-            
+
             month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
             enrolled_monthly_counts[month_year] += 1
 
-        # Sort the results by month
-        sorted_counts = sorted(enrolled_monthly_counts.items())
-        print("gg",sorted_counts)
-        
+        # Query all enquiries
+        all_enquiries = Enquiry.objects.all()
 
-        context["sorted_counts "] = sorted_counts 
+        # Initialize defaultdict to count all enquiries per month
+        all_enquiries_monthly_counts = defaultdict(int)
 
+        # Iterate over all enquiries to count them per month
+        for enquiry in all_enquiries:
+            if isinstance(enquiry.registered_on, str):
+                enquiry.registered_on = datetime.strptime(enquiry.registered_on, '%Y-%m-%d %H:%M:%S.%f')
+
+            month_year = datetime(enquiry.registered_on.year, enquiry.registered_on.month, 1)
+            all_enquiries_monthly_counts[month_year] += 1
+
+        # Sort the results by month for enrolled enquiries
+        sorted_enrolled_counts = sorted(enrolled_monthly_counts.items())
+
+        # Extracting month names and counts for enrolled enquiries
+        enrolled_months = [date.strftime("%B %Y") for date, _ in sorted_enrolled_counts]
+        enrolled_counts = [count for _, count in sorted_enrolled_counts]
+
+        # Sort the results by month for all enquiries
+        sorted_all_counts = sorted(all_enquiries_monthly_counts.items())
+
+        # Extracting month names and counts for all enquiries
+        all_months = [date.strftime("%B %Y") for date, _ in sorted_all_counts if date.year == datetime.now().year]  # Filter by current year
+        all_counts = [count for _, count in sorted_all_counts if _.year == datetime.now().year]  # Filter by current year
+        print("all counts",all_counts)
         
+        enq_count = sum(all_counts)
+        enq_enrolled_count = sum(enrolled_counts)
+        
+       
         # enrolled_monthly_counts = (
         #     Enquiry.objects.filter(lead_status="Enrolled")
         #     .annotate(month=TruncMonth("registered_on"))
@@ -178,6 +267,7 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         #     if all_enq.exists():
         #         enq_count = all_enq[0]["count"]
 
+        
         context["total_agent_count"] = total_agent_count
         context["employee_count"] = employee_count
         #     context["leadarchive_count"] = leadarchive_count
@@ -188,8 +278,8 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         context["package"] = package
         # context["enrolled_monthly_counts"] = enrolled_monthly_counts
         #     context["all_enq"] = all_enq
-        #     context["enq_count"] = enq_count
-        #     context["enq_enrolled_count"] = enq_enrolled_count
+        context["enq_count"] = enq_count
+        context["enq_enrolled_count"] = enq_enrolled_count
         context["story"] = story
         context["latest_news"] = latest_news
         context["todo"] = todo
@@ -201,6 +291,11 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         context["completed_count"] = completed_count
         context["leadresult_count"] = leadresult_count
         context["webpackages"] = webpackages
+        context["enrolled_months"] = enrolled_months
+        context["enrolled_counts"] = enrolled_counts
+        context["all_months"] = all_months
+        context["all_counts"] = all_counts
+        
 
         return context
 
