@@ -112,7 +112,7 @@ from datetime import datetime  # Import datetime directly
 
 
 
-@csrf_protect
+
 class admin_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Admin/Dashboard/dashboard.html"
 
