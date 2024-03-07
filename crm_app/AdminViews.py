@@ -51,7 +51,7 @@ from .notifications import (
 
 ######################################### COUNTRY #################################################
 
-
+from django.views.decorators.csrf import csrf_protect
 from collections import defaultdict
 from datetime import datetime  # Import datetime directly
 
@@ -112,7 +112,7 @@ from datetime import datetime  # Import datetime directly
 
 
 
-
+@csrf_protect
 class admin_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Admin/Dashboard/dashboard.html"
 
