@@ -4,6 +4,7 @@ from .AdminViews import *
 from .API_views import WebsitePackage
 
 urlpatterns = [
+    
     path("Dashboard/", admin_dashboard.as_view(), name="admin_dashboard"),
     path("AddVisaCountry/", add_visacountry, name="add_visacountry"),
     path("VisaCountry/update/", visacountryupdate_view, name="visacountryupdate_view"),
