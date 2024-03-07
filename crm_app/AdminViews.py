@@ -131,7 +131,7 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         employee_count = Employee.objects.all().count()
 
         leadarchive_count = Enquiry.objects.filter(archive__in=[True]).count()
-        
+       
         
 
         leadaccept_count = Enquiry.objects.filter(lead_status="Enrolled").count()
@@ -270,7 +270,7 @@ class admin_dashboard(LoginRequiredMixin, TemplateView):
         
         context["total_agent_count"] = total_agent_count
         context["employee_count"] = employee_count
-        #     context["leadarchive_count"] = leadarchive_count
+        context["leadarchive_count"] = leadarchive_count
         context["leadaccept_count"] = leadaccept_count
         context["leadpending_count"] = leadpending_count
         context["leadtotal_count"] = leadtotal_count

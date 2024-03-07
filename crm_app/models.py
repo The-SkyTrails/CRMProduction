@@ -713,7 +713,6 @@ class Enquiry(models.Model):
     last_updated_on = models.DateTimeField(auto_now_add=False, auto_now=True)
     registered_on = models.DateTimeField(auto_now_add=True, auto_now=False)
     case_id = models.CharField(max_length=15, unique=True, editable=False)
-
     archive = models.BooleanField(default=False)
 
     # --------------------- Color ----------------------------
