@@ -4567,3 +4567,11 @@ def admin_completed_leads_details(request):
 
 
 
+
+
+def admin_subagent_list(request):
+    subagent = SubAgent.objects.all()
+    context = {
+        'subagent':subagent
+        }
+    return render(request,'Admin/SubAgent/subagentlist.html',context)

@@ -303,6 +303,8 @@ urlpatterns = [
         admin_completed_leads_details,
         name="admin_completed_leads_details",
     ),
+
+    path("SubAgent/List", admin_subagent_list, name="admin_subagent_list"),
     
 
 

@@ -1,6 +1,5 @@
 from .models import FAQ, Notification
 
-
 def faq_count(request):
     if request.user.is_authenticated:
         count = (
@@ -9,6 +8,7 @@ def faq_count(request):
     else:
         count = 0
     return {"faq_count": count}
+
 
 
 def current_login(request):
@@ -73,3 +73,4 @@ def current_login(request):
            
             
     return {}
+    

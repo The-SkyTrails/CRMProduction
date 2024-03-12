@@ -121,7 +121,8 @@ def view_admin(request):
 
 
 def edit_admin(request, user_id):
-    admin = get_object_or_404(Admin, users_id=user_id)
+    # admin = get_object_or_404(Admin, users_id=user_id)
+    admin = Admin.objects.get(id=user_id)
 
     if request.method == "POST":
         department = request.POST.get("department")

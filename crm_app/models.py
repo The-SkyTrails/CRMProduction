@@ -68,6 +68,7 @@ class CustomUser(AbstractUser):
         ("4", "Agent"),
         ("5", "Out Sourcing Agent"),
         ("6", "Customer"),
+        ("7", "Sub Agent"),
     )
     user_type = models.CharField(default="1", choices=user_type_data, max_length=10)
     is_logged_in = models.BooleanField(default=False)
@@ -393,6 +394,62 @@ class OutSourcingAgent(models.Model):
         return f"{self.users.first_name} {self.users.last_name}"
 
 
+
+
+class SubAgent(models.Model):
+    
+    users = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    agent = models.ForeignKey(Agent,on_delete=models.SET_NULL, null=True, blank=True)
+    outsourceagent = models.ForeignKey(OutSourcingAgent,on_delete=models.SET_NULL, null=True, blank=True)
+    contact_no = models.CharField(max_length=20)
+    country = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    City = models.CharField(max_length=50)
+    Address = models.TextField()
+    zipcode = models.CharField(max_length=100)
+    dob = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=Gender, null=True, blank=True)
+    marital_status = models.CharField(
+        max_length=50, choices=marital_status, null=True, blank=True
+    )
+    status = models.CharField(max_length=255, choices=status, default="Pending")
+    activeinactive = models.BooleanField(default=True, null=True, blank=True)
+    profile_pic = models.ImageField(
+        upload_to="SubAgent/Profile Pic/", null=True, blank=True
+    )
+    assign_employee = models.ForeignKey(
+        Employee, on_delete=models.CASCADE, null=True, blank=True
+    )
+
+    organization_name = models.CharField(max_length=100, null=True, blank=True)
+    business_type = models.CharField(max_length=100, null=True, blank=True)
+    registration_number = models.CharField(max_length=100, null=True, blank=True)
+
+    # ---------- Bank Information ----------------
+
+    account_holder = models.CharField(max_length=100, null=True, blank=True)
+    bank_name = models.CharField(max_length=100, null=True, blank=True)
+    branch_name = models.CharField(max_length=100, null=True, blank=True)
+    account_no = models.CharField(max_length=100, null=True, blank=True)
+    ifsc_code = models.CharField(max_length=100, null=True, blank=True)
+    last_updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    registeron = models.DateTimeField(auto_now_add=True, auto_now=False)
+    
+    # -------------------------- kyc information ------------------
+
+    adhar_card_front = models.FileField(upload_to="SubAgent/Adhaar/Front", null=True, blank=True)
+    adhar_card_back = models.FileField(upload_to="SubAgent/Adhaar/Back", null=True, blank=True)
+    pancard = models.FileField(upload_to="SubAgent/pancard", null=True, blank=True)
+    registration_certificate = models.FileField(
+        upload_to="SubAgent/RegistrationCertificate", null=True, blank=True
+    )
+    
+    register_by = models.ForeignKey(CustomUser,on_delete=models.SET_NULL, null=True, blank=True,related_name="registered_subagents",)
+
+    def __str__(self):
+        return f"{self.users.first_name} {self.users.last_name}"
+
+
 PROCESSING_TIME_CHOICES = [
     ("1 Month", "1 Month"),
     ("2 Month", "2 Month"),
@@ -471,6 +528,9 @@ class AgentAgreement(models.Model):
     agent = models.ForeignKey(Agent, on_delete=models.SET_NULL, null=True, blank=True)
     outsourceagent = models.ForeignKey(
         OutSourcingAgent, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    subagent = models.ForeignKey(
+        SubAgent, on_delete=models.SET_NULL, null=True, blank=True
     )
     agreement_name = models.CharField(max_length=100)
     agreement_file = models.FileField(
@@ -1126,6 +1186,9 @@ def create_admin_profile(sender, instance, created, **kwargs):
                 type="",
                 profile_pic="",
             )
+        elif instance.user_type == "7":
+            SubAgent.objects.create(users=instance)
+            
 
 
 @receiver(post_save, sender=CustomUser)
@@ -1138,3 +1201,5 @@ def save_user_profile(sender, instance, **kwargs):
         instance.agent.save()
     if instance.user_type == "5":
         instance.outsourcingagent.save()
+    if instance.user_type == "7":
+        instance.subagent.save()

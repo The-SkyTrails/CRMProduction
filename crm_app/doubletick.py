@@ -14,6 +14,8 @@ def whatsapp_signup_mes(firstname, lastname, email, password,mobile , user_type)
         user_type_name = "Agent"
     elif user_type == "5":
         user_type_name = "OutSource Agent"
+    elif user_type == "7":
+        user_type_name = "SubAgent"
     elif user_type == "2":
         user_type_name = "Admin"
     else:

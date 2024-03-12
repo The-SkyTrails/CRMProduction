@@ -80,4 +80,13 @@ urlpatterns = [
     path("Delete/Todo/<int:id>/", Agent_delete_todo, name="Agent_delete_todo"),
     path("NewLead/Save/", submit, name="agent_newlead_save"),
     path("WebsitePackage/", AgentWebsitePackage, name="Agent_websitepackage"),
+
+
+    # ---------------------------------- SubAgent -------------------------
+    path("Add/SubAgent/", add_subagent, name="add_subagent"),
+    path("SubAgent/List", subagent_list, name="subagent_list"),
+    path("SubAgent/Delete/<int:id>/", subagent_delete, name="subagent_delete"),
+    path("SubAgent/Details/<int:id>", subagent_details, name="subagent_details"),
+    path("SubAgent/Agreement/<int:id>", subagent_agreement, name="subagent_agreement"),
+
 ]

@@ -35,6 +35,8 @@ from .notifications import (
     send_notification_admin,
 )
 from collections import defaultdict
+from .doubletick import whatsapp_signup_mes, product_add_mes
+from .Email.email_utils import send_congratulatory_email, send_package_email
 
 class agent_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Agent/Dashboard/dashboard.html"
@@ -1653,3 +1655,200 @@ def submit(request):
 
         enq.save()
         return redirect("agent_new_leads_details")
+
+
+
+# --------------------------------- SubAgent ---------------------------
+
+
+def add_subagent(request):
+    if request.method == "POST":
+  
+        firstname = request.POST.get("firstname")
+        lastname = request.POST.get("lastname")
+        email = request.POST.get("email")
+        contact = request.POST.get("contact")
+        password = request.POST.get("password")
+        country = request.POST.get("country")
+        state = request.POST.get("state")
+        city = request.POST.get("city")
+        address = request.POST.get("address")
+        zipcode = request.POST.get("zipcode")
+        files = request.FILES.get("files")
+        fullname = str(firstname + lastname)
+
+        existing_agent = CustomUser.objects.filter(username=email)
+
+        try:
+            if existing_agent:
+                messages.error(request, f'"{email}" already exists.')
+                return redirect("add_subagent")
+            
+
+            user = CustomUser.objects.create_user(
+                username=email,
+                first_name=firstname,
+                last_name=lastname,
+                email=email,
+                password=password,
+                user_type="7",
+            )
+            logged_in_user = request.user
+            last_assigned_index = cache.get("last_assigned_index") or 0
+            sales_team_employees = Employee.objects.filter(department="Sales")
+            if logged_in_user.user_type == "4":
+                user.subagent.agent = logged_in_user.agent
+            
+            if logged_in_user.user_type == "5":
+                user.subagent.outsourceagent = logged_in_user.agent
+            
+            # user.subagent.agent = logged_in_user.agent   
+            user.subagent.contact_no = contact
+            user.subagent.country = country
+            user.subagent.state = state
+            user.subagent.City = city
+            user.subagent.Address = address
+            user.subagent.zipcode = zipcode
+            user.subagent.profile_pic = files
+            user.subagent.register_by = logged_in_user
+            if sales_team_employees.exists():
+                
+                next_index = (
+                    last_assigned_index + 1
+                ) % sales_team_employees.count()
+                user.subagent.assign_employee = sales_team_employees[
+                    next_index
+                ]
+                chat_group_name = f"{fullname} SubAgent Group"
+                chat_group = ChatGroup.objects.create(
+                    group_name=chat_group_name,
+                    create_by=logged_in_user,
+                )
+                chat_group.group_member.add(
+                    user.subagent.assign_employee.users
+                )  # Add assigned employee
+                chat_group.group_member.add(user)
+                cache.set("last_assigned_index", next_index)
+            user.save()
+            send_congratulatory_email(
+                firstname, lastname, email, password, user_type="7"
+            )
+            messages.success(
+                request,
+                "SubAgent Added Successfully , Congratulation Mail Send Successfully!!",
+            )
+
+            mobile = contact
+            try:
+                whatsapp_signup_mes(
+                    firstname, lastname, email, password, mobile, user_type="7"
+                )
+            except:
+                pass
+
+            return redirect("subagent_list")
+   
+        except Exception as e:
+            
+            messages.error(request, e)
+
+
+    return render(request,'Agent/SubAgent/addsubagent.html')
+
+def subagent_list(request):
+    user = request.user
+    subagent = SubAgent.objects.filter(agent=user.agent)
+    context = {
+        'subagent':subagent
+        }
+    return render(request,'Agent/SubAgent/subagentlist.html',context)
+
+def subagent_delete(request,id):
+    subagent = SubAgent.objects.get(id=id)
+    subagent.delete()
+    messages.success(request,"SubAgent Deleted...")
+    return redirect('subagent_list')
+
+    
+
+
+
+@login_required
+def subagent_details(request, id):
+    subagent = SubAgent.objects.get(id=id)
+    users = subagent.users
+
+
+    if request.method == "POST":
+        
+        firstname = request.POST.get("first_name")
+        lastname = request.POST.get("last_name")
+
+        dob = request.POST.get("dob")
+        gender = request.POST.get("gender")
+        maritial = request.POST.get("maritial")
+        original_pic = request.FILES.get("original_pic")
+        organization = request.POST.get("organization")
+        business_type = request.POST.get("business_type")
+        registration = request.POST.get("registration")
+        address = request.POST.get("address")
+        country = request.POST.get("country")
+        state = request.POST.get("state")
+        city = request.POST.get("city")
+        zipcode = request.POST.get("zipcode")
+        accountholder = request.POST.get("accountholder")
+        bankname = request.POST.get("bankname")
+        branchname = request.POST.get("branchname")
+        account = request.POST.get("account")
+        ifsc = request.POST.get("ifsc")
+       
+        if dob:
+            users.subagent.dob = dob
+        if gender:
+            users.subagent.gender = gender
+        if maritial:
+            users.subagent.marital_status = maritial
+        if original_pic:
+            users.subagent.profile_pic = original_pic
+
+        users.first_name = firstname
+
+        users.subagent.organization_name = organization
+        users.subagent.business_type = business_type
+        users.subagent.registration_number = registration
+        users.subagent.Address = address
+        users.subagent.country = country
+        users.subagent.state = state
+        users.subagent.City = city
+        users.subagent.zipcode = zipcode
+        users.subagent.account_holder = accountholder
+        users.subagent.bank_name = bankname
+        users.subagent.branch_name = branchname
+        users.subagent.account_no = account
+        users.subagent.ifsc_code = ifsc
+
+        users.save()
+        messages.success(request, "Updated Successfully")
+        return redirect("subagent_details", id)
+
+    context = {"subagent": subagent}
+    return render(request, "Agent/SubAgent/Update/subagentupdate.html", context)
+
+
+
+
+@login_required
+def subagent_agreement(request, id):
+    agent = SubAgent.objects.get(id=id)
+    agntagreement = AgentAgreement.objects.filter(subagent=agent)
+    if request.method == "POST":
+        name = request.POST.get("agreement_name")
+        file = request.FILES.get("file")
+        agreement = AgentAgreement.objects.create(
+            agent=agent, agreement_name=name, agreement_file=file
+        )
+        agreement.save()
+        messages.success(request, "Agreement Updated Succesfully...")
+        return redirect("admin_agent_agreement", id)
+    context = {"agent": agent, "agreement": agntagreement}
+    return render(request, "Agent/SubAgent/Update/subagentagreement.html", context)
