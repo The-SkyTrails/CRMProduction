@@ -208,6 +208,7 @@ def verify_otp(request):
         # if submitted_otp == sendotp:
         if submitted_otp == sendotp:
             user = authenticate(request, username=username, password=password)
+            print("usersssss",user)
 
             if user != None:
                 login(request, user)
@@ -228,6 +229,10 @@ def verify_otp(request):
                     user.is_logged_in = True
                     user.save()
                     return redirect("agent_dashboard")
+                if user_type == "7":
+                    user.is_logged_in = True
+                    user.save()
+                    return redirect("subagent_dashboard")
 
                 public_ip = get_public_ip()
                 LoginLog.objects.create(
@@ -266,7 +271,7 @@ def CustomLoginView(request):
                         login(request, user)
                         return redirect("SuperAdmin/crm/dashboard/")
 
-                elif user_type in ("2", "3", "4", "5"):
+                elif user_type in ("2", "3", "4", "5","7"):
                     public_ip = get_public_ip()
                     LoginLog.objects.create(
                         user=user,
@@ -292,6 +297,8 @@ def CustomLoginView(request):
 
                     if user_type == "5":
                         mob = customeruser.outsourcingagent.contact_no
+                    if user_type == "7":
+                        mob = customeruser.subagent.contact_no
 
                     request.session["mobile"] = mob
                     random_number = random.randint(0, 99999)

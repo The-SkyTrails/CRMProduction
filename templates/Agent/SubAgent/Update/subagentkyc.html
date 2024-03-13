@@ -1,4 +1,4 @@
-{% extends "Admin/Base/base.html" %}
+{% extends "Agent/Base/base.html" %}
 {% load static %}
 {% block main-content %}
 <div class="form-container">
@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="text-container">
-      <a href="{% url "admin_dashboard" %}" style="text-decoration: none">
+      <a href="{% url "agent_dashboard" %}" style="text-decoration: none">
         <div class="text">Dashboard</div>
       </a>
     </div>
@@ -66,12 +66,12 @@
   </div>
   <!-- ///////////////////////////////////////// -->
   <div class="agentem-container">
-    <a  class="agent-text2" href="{% url "admin_agent_details" agent.id %}">
+    <a  class="agent-text2" href="{% url "subagent_details" agent.id %}">
     <div class="custom-box">
       <div class="agent-text3">All Details</div>
     </div>
   </a>
-  <a class="agent-text2" href="{% url "admin_agent_agreement" agent.id %}">
+  <a class="agent-text2" href="{% url "subagent_agreement" agent.id %}">
     <div class="custom-box">
 <div class="agent-text2">Agreements</div>
     </div>
@@ -80,7 +80,7 @@
       <div class="agent-text1">KYC Details</div>
     </div>
   </div>
-  {% include "Admin/Base/messages.html" %}
+  {% include "Agent/Base/messages.html" %}
 
   
   <div class="inputforms-container">
@@ -309,9 +309,9 @@
   </div>
 </div>
 
-{% include "Admin/Agent Management/Update/adhar_card_front_modal.html" %}
-{% include "Admin/Agent Management/Update/adhar_card_back_modal.html" %}
-{% include "Admin/Agent Management/Update/pan_card_modal.html" %}
-{% include "Admin/Agent Management/Update/registration_certificate-modal.html" %}
+{% include "Agent/SubAgent/Update/adhar_card_front_modal.html" %}
+{% include "Agent/SubAgent/Update/adhar_card_back_modal.html" %}
+{% include "Agent/SubAgent/Update/pan_card_modal.html" %}
+{% include "Agent/SubAgent/Update/registration_certificate-modal.html" %}
 
 {% endblock main-content %}

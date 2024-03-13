@@ -69,6 +69,7 @@ class CustomUser(AbstractUser):
         ("5", "Out Sourcing Agent"),
         ("6", "Customer"),
         ("7", "Sub Agent"),
+        ("8", "AgentSubAgent Employee"),
     )
     user_type = models.CharField(default="1", choices=user_type_data, max_length=10)
     is_logged_in = models.BooleanField(default=False)
@@ -177,7 +178,7 @@ class Branch(models.Model):
 
 class Group(models.Model):
 
-    group_name = models.CharField(max_length=100, unique=True)
+    group_name = models.CharField(max_length=100)
     group_member = models.ManyToManyField(CustomUser, related_name="groups_member")
     create_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True
@@ -450,6 +451,41 @@ class SubAgent(models.Model):
         return f"{self.users.first_name} {self.users.last_name}"
 
 
+
+class AgentSubAgentEmployee(models.Model):
+
+    users = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    agent = models.ForeignKey(Agent,on_delete=models.SET_NULL,null=True,blank=True)
+    subagent = models.ForeignKey(SubAgent,on_delete=models.SET_NULL,null=True,blank=True)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True)
+    contact_no = models.CharField(max_length=20, null=True, blank=True)
+    country = models.CharField(max_length=50, null=True, blank=True)
+    state = models.CharField(max_length=50, null=True, blank=True)
+    City = models.CharField(max_length=50, null=True, blank=True)
+    Address = models.TextField(null=True, blank=True)
+    zipcode = models.CharField(max_length=100, null=True, blank=True)
+    profile_pic_agent_employee = models.FileField(upload_to="AgentSubAgentEmployee/AgentEmployee/profile_pic/", null=True, blank=True)
+    profile_pic_subagent_employee = models.FileField(upload_to="AgentSubAgentEmployee/SubAgentEmployee/profile_pic/", null=True, blank=True)
+    created = models.DateTimeField(auto_now=True)
+    tata_tele_authorization = models.CharField(max_length=500, null=True, blank=True)
+    tata_tele_api_key = models.CharField(max_length=200, null=True, blank=True)
+    tata_tele_agent_number = models.CharField(max_length=200, null=True, blank=True)
+    color_code = models.CharField(
+        max_length=20, choices=COLOR_CODE, blank=True, null=True
+    )
+
+    def save(self, *args, **kwargs):
+        # Check if a group is provided when saving the employee
+        if self.group:
+            # Add the employee to the group
+            self.group.group_member.add(self.users)
+        super(Employee, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.users.username
+
+
+
 PROCESSING_TIME_CHOICES = [
     ("1 Month", "1 Month"),
     ("2 Month", "2 Month"),
@@ -544,6 +580,7 @@ class AgentKyc(models.Model):
     outsourceagent = models.ForeignKey(
         OutSourcingAgent, on_delete=models.SET_NULL, null=True, blank=True
     )
+    subagent = models.ForeignKey(SubAgent, on_delete=models.SET_NULL, null=True, blank=True)
     adhar_card_front = models.FileField(upload_to="Agent/Kyc", null=True, blank=True)
     adhar_card_back = models.FileField(upload_to="Agent/Kyc", null=True, blank=True)
     pancard = models.FileField(upload_to="Agent/Kyc", null=True, blank=True)
@@ -1189,6 +1226,9 @@ def create_admin_profile(sender, instance, created, **kwargs):
         elif instance.user_type == "7":
             SubAgent.objects.create(users=instance)
             
+        elif instance.user_type == "8":
+            AgentSubAgentEmployee.objects.create(users=instance)
+            
 
 
 @receiver(post_save, sender=CustomUser)
@@ -1203,3 +1243,5 @@ def save_user_profile(sender, instance, **kwargs):
         instance.outsourcingagent.save()
     if instance.user_type == "7":
         instance.subagent.save()
+    if instance.user_type == "8":
+        instance.agentsubagentemployee.save()

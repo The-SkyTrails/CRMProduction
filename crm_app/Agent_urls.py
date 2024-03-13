@@ -88,5 +88,10 @@ urlpatterns = [
     path("SubAgent/Delete/<int:id>/", subagent_delete, name="subagent_delete"),
     path("SubAgent/Details/<int:id>", subagent_details, name="subagent_details"),
     path("SubAgent/Agreement/<int:id>", subagent_agreement, name="subagent_agreement"),
+    path("SubAgent/Agreement/update/<int:id>/",subagent_agreement_update,name="subagent_agreement_update",),
+    path("SubAgent/Agreement/Delete/<int:id>/",subagent_agreement_delete,name="subagent_agreement_delete",),
+    path("SubAgent/Kyc/<int:id>", subagent_kyc, name="subagent_kyc"),
+    
+    
 
 ]

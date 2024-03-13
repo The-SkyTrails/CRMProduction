@@ -1845,10 +1845,92 @@ def subagent_agreement(request, id):
         name = request.POST.get("agreement_name")
         file = request.FILES.get("file")
         agreement = AgentAgreement.objects.create(
-            agent=agent, agreement_name=name, agreement_file=file
+            subagent=agent, agreement_name=name, agreement_file=file
         )
         agreement.save()
         messages.success(request, "Agreement Updated Succesfully...")
-        return redirect("admin_agent_agreement", id)
+        return redirect("subagent_agreement", id)
     context = {"agent": agent, "agreement": agntagreement}
     return render(request, "Agent/SubAgent/Update/subagentagreement.html", context)
+
+
+
+
+
+@login_required
+def subagent_agreement_update(request, id):
+    agree = AgentAgreement.objects.get(id=id)
+    agent = agree.subagent
+
+    if request.method == "POST":
+        agntagreement = AgentAgreement.objects.get(id=id)
+        agreement_name = request.POST.get("agreement_name")
+        file = request.FILES.get("file")
+
+        agntagreement.agreement_name = agreement_name
+        if file:
+            agntagreement.agreement_file = file
+        agntagreement.save()
+        messages.success(request, "Agreement Updated Successfully...")
+        return redirect("subagent_agreement", agent.id)
+    
+
+
+@login_required
+def subagent_agreement_delete(request, id):
+    agree = AgentAgreement.objects.get(id=id)
+    agent = agree.subagent
+    agreement = AgentAgreement.objects.get(id=id)
+    agreement.delete()
+    messages.success(request, "Agreement Deleted Successfully...")
+    return redirect("subagent_agreement", agent.id)
+
+
+
+
+@login_required
+def subagent_kyc(request, id):
+    agent = SubAgent.objects.get(id=id)
+    kyc_agent = AgentKyc.objects.filter(subagent=agent).last
+
+    kyc_id = None
+
+    if request.method == "POST":
+        adharfront_file = request.FILES.get("adharfront_file")
+        adharback_file = request.FILES.get("adharback_file")
+        pan_file = request.FILES.get("pan_file")
+        registration_file = request.FILES.get("registration_file")
+        try:
+            kyc_id = AgentKyc.objects.get(subagent=agent)
+
+            if kyc_id:
+                if adharfront_file:
+                    kyc_id.adhar_card_front = adharfront_file
+                if adharback_file:
+                    kyc_id.adhar_card_back = adharback_file
+                if pan_file:
+                    kyc_id.pancard = pan_file
+                if registration_file:
+                    kyc_id.registration_certificate = registration_file
+                kyc_id.save()
+                messages.success(request, "Kyc Added Successfully..")
+                return redirect("subagent_kyc", id)
+            else:
+                pass
+
+        except AgentKyc.DoesNotExist:
+            kyc_id = None
+            kyc = AgentKyc.objects.create(
+                subagent=agent,
+                adhar_card_front=adharfront_file,
+                adhar_card_back=adharback_file,
+                pancard=pan_file,
+                registration_certificate=registration_file,
+            )
+            kyc.save()
+            messages.success(request, "Kyc Added Successfully..")
+            return redirect("subagent_kyc", id)
+
+    context = {"agent": agent, "kyc_id": kyc_id, "kyc_agent": kyc_agent}
+
+    return render(request, "Agent/SubAgent/Update/subagentkyc.html", context)

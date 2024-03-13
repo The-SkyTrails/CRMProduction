@@ -2,7 +2,7 @@
 {% load custom_filters %}
 <div class="modal" id="myModal-{{i.id}}">
   <div class="modal-dialog">
-    <form action="{% url "update_agreement" i.id %}" method="POST" id="Agreementupdate"  autocomplete="off" enctype="multipart/form-data" >
+    <form action="{% url "subagent_agreement_update" i.id %}" method="POST" id="Agreementupdate"  autocomplete="off" enctype="multipart/form-data" >
       {% csrf_token %}
       <div class="modal-content">
         <!-- Modal Header -->

@@ -136,15 +136,17 @@
                   </div>
                </div>
                </a>
-               {% if not i.approval %}
+               {% comment %} {% if not i.approval %} {% endcomment %}
                <a href="{% url "approve_product" i.id %}">
                <div class="Button" style="background-color:Green;">
                   <div class="Text">Approve</div>
                </div>
                </a>
-               {% else %}
+               {% comment %} {% else %} {% endcomment %}
                
-               {% endif %}
+               
+               
+               {% comment %} {% endif %} {% endcomment %}
                <div class="row" style="display: flex;">
                   <div class="col-md-4">
                      <a href="{% url "editPackage" i.id %}">
