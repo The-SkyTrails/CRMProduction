@@ -83,6 +83,8 @@ urlpatterns = [
 
 
     # ---------------------------------- SubAgent -------------------------
+
+    
     path("Add/SubAgent/", add_subagent, name="add_subagent"),
     path("SubAgent/List", subagent_list, name="subagent_list"),
     path("SubAgent/Delete/<int:id>/", subagent_delete, name="subagent_delete"),
@@ -92,6 +94,12 @@ urlpatterns = [
     path("SubAgent/Agreement/Delete/<int:id>/",subagent_agreement_delete,name="subagent_agreement_delete",),
     path("SubAgent/Kyc/<int:id>", subagent_kyc, name="subagent_kyc"),
     
-    
 
+    # ----------------------------------- Agent Employee --------------------------
+    
+    path("Add/Employee/", agent_add_employee, name="agent_add_employee"),
+    path("Employee/List", agent_emp_list.as_view(), name="agent_emp_list"),
+    path("Employee/Edit/<int:pk>/", agent_emp_edit, name="agent_emp_edit"),
+    path("Employee/Delete/<int:id>/", agent_emp_delete, name="agent_emp_delete"),
+    
 ]

@@ -3724,8 +3724,8 @@ def approve_product(request, id):
     instance.approval = "Yes"
     instance.save()
 
-    send_whatsapp_messages(instance)
-    send_email(instance)
+    # send_whatsapp_messages(instance)
+    # send_email(instance)
 
     return redirect("Package_list")
 

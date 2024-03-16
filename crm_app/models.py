@@ -467,19 +467,14 @@ class AgentSubAgentEmployee(models.Model):
     profile_pic_agent_employee = models.FileField(upload_to="AgentSubAgentEmployee/AgentEmployee/profile_pic/", null=True, blank=True)
     profile_pic_subagent_employee = models.FileField(upload_to="AgentSubAgentEmployee/SubAgentEmployee/profile_pic/", null=True, blank=True)
     created = models.DateTimeField(auto_now=True)
-    tata_tele_authorization = models.CharField(max_length=500, null=True, blank=True)
-    tata_tele_api_key = models.CharField(max_length=200, null=True, blank=True)
-    tata_tele_agent_number = models.CharField(max_length=200, null=True, blank=True)
-    color_code = models.CharField(
-        max_length=20, choices=COLOR_CODE, blank=True, null=True
-    )
+    
 
     def save(self, *args, **kwargs):
         # Check if a group is provided when saving the employee
         if self.group:
             # Add the employee to the group
             self.group.group_member.add(self.users)
-        super(Employee, self).save(*args, **kwargs)
+        super(AgentSubAgentEmployee, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.users.username

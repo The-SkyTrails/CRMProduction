@@ -1765,7 +1765,7 @@ def subagent_list(request):
 
 def subagent_delete(request,id):
     subagent = SubAgent.objects.get(id=id)
-    subagent.delete()
+    subagent.users.delete()
     messages.success(request,"SubAgent Deleted...")
     return redirect('subagent_list')
 
@@ -1934,3 +1934,136 @@ def subagent_kyc(request, id):
     context = {"agent": agent, "kyc_id": kyc_id, "kyc_agent": kyc_agent}
 
     return render(request, "Agent/SubAgent/Update/subagentkyc.html", context)
+
+
+
+
+@login_required
+def agent_add_employee(request):
+    
+    if request.method == "POST":
+        
+ 
+        firstname = request.POST.get("firstname")
+        lastname = request.POST.get("lastname")
+        contact = request.POST.get("contact")
+        country = request.POST.get("country")
+        city = request.POST.get("city")
+        state = request.POST.get("state")
+        email = request.POST.get("email")
+        address = request.POST.get("address")
+        zipcode = request.POST.get("zipcode")
+        password = "123456"
+        
+        files = request.FILES.get("file")
+        
+        if CustomUser.objects.filter(username=email).exists():
+            messages.warning(request, f'"this email {email}" already exists.')
+            return redirect("agent_add_employee")
+
+       
+        user = CustomUser.objects.create_user(
+            # id=new_customuser_id,
+            username=email,
+            first_name=firstname,
+            last_name=lastname,
+            email=email,
+            password=password,
+            user_type="8",
+        )
+
+       
+        user.agentsubagentemployee.contact_no = contact
+        user.agentsubagentemployee.country = country
+        user.agentsubagentemployee.state = state
+        user.agentsubagentemployee.City = city
+        user.agentsubagentemployee.Address = address
+        user.agentsubagentemployee.zipcode = zipcode
+        user.agentsubagentemployee.profile_pic_agent_employee = files
+        user.agentsubagentemployee.agent=request.user.agent
+        # user.users = new_customuser_id
+        user.save()
+  
+        send_congratulatory_email(firstname, lastname, email, password, user_type="8")
+        messages.success(
+            request,
+            "Employee Added Successfully , Congratulation Mail Send Successfully!!",
+        )
+
+        mobile = contact
+        return redirect("agent_emp_list")
+        # try:
+        #     whatsapp_signup_mes(
+        #         firstname, lastname, email, password, mobile, user_type="3"
+        #     )
+        # except:
+        #     pass
+
+        # return redirect("emp_list")
+
+        # except Exception as e:
+        #     messages.warning(request, str(e))
+        #     return redirect("emp_personal_details")
+
+    
+    return render(request, "Agent/EmployeeManagement/addemp.html")
+
+
+
+
+class agent_emp_list(LoginRequiredMixin, ListView):
+    model = AgentSubAgentEmployee
+    template_name = "Agent/EmployeeManagement/Employeelist.html"
+    context_object_name = "employee"
+
+    def get_queryset(self):
+        return AgentSubAgentEmployee.objects.order_by("-id")
+
+
+def agent_emp_edit(request, pk):
+    employee = AgentSubAgentEmployee.objects.get(pk=pk)
+    if request.method == "POST":
+        
+        employee_id = request.POST.get("employee_id")
+        firstname = request.POST.get("firstname")
+        lastname = request.POST.get("lastname")
+        email = request.POST.get("email")
+        contact = request.POST.get("contact")
+        country = request.POST.get("country")
+        state = request.POST.get("state")
+        city = request.POST.get("city")
+        address = request.POST.get("address")
+        zipcode = request.POST.get("zipcode")
+        file = request.FILES.get("file")
+
+        user = CustomUser.objects.get(id=employee_id)
+
+        user.first_name = firstname
+        user.last_name = lastname
+        user.email = email
+        user.agentsubagentemployee.contact_no = contact
+        user.agentsubagentemployee.country = country
+        user.agentsubagentemployee.state = state
+        user.agentsubagentemployee.City = city
+        user.agentsubagentemployee.Address = address
+        user.agentsubagentemployee.zipcode = zipcode
+
+        if file:
+            user.agentsubagentemployee.profile_pic_agent_employee = file
+        user.save()
+        messages.success(request, "Employee Updated Successfully")
+        return redirect("agent_emp_list")
+
+    
+    context = {"employee": employee}
+
+    return render(request,"Agent/EmployeeManagement/editemp.html",context)
+
+
+
+def agent_emp_delete(request,id):
+    agnt_subagnt_employee = AgentSubAgentEmployee.objects.get(id=id)
+    agnt_subagnt_employee.users.delete()
+    messages.success(request, "Employee Deleted Successfully")
+    return redirect('agent_emp_list')
+    

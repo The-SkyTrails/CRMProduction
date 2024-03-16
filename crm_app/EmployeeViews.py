@@ -370,9 +370,10 @@ class emp_Enquiry1View(LoginRequiredMixin, CreateView):
     def get(self, request):
         form = EnquiryForm1()
         user = request.user
+        print("user",user)
         dep = user.employee.department
         context = {"dep": dep, "form": form}
-        return render(request, "Employee/Enquiry/lead1.html", context)
+        return render(request, "Employee/Enquiry/lead1.html",context)
 
     def post(self, request):
         form = EnquiryForm1(request.POST)
