@@ -2,7 +2,7 @@ import requests
 
 
 def send_whatsapp_message(mobile_number, message):
-    print("tetingggg", mobile_number)
+    
     url = "https://api.bulkwhatsapp.net/wapp/api/send"
 
     payload_data = {

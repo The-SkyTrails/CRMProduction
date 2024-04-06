@@ -601,7 +601,6 @@ def emp_delete_docfile(request, id):
 
 @login_required
 def employee_lead_list(request):
-
     user = request.user
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
@@ -620,6 +619,7 @@ def employee_lead_list(request):
                 enq = Enquiry.objects.filter(
                     Q(assign_to_employee=user.employee) | Q(created_by=user)
                 ).order_by("-id")
+                print("enqqq",enq)
             elif dep == "Sales":
                 enq = Enquiry.objects.filter(
                     Q(assign_to_sales_employee=user.employee) | Q(created_by=user)
@@ -641,18 +641,18 @@ def employee_lead_list(request):
             else:
                 enq = Enquiry.objects.filter(created_by=request.user)
 
-            context = {
-                "enq": enq,
-                "user": user,
-                "dep": dep,
-                "presales_employees": presales_employees,
-                "sales_employees": sales_employees,
-                "documentation_employees": documentation_employees,
-                "visa_team": visa_team,
-                "lead": lead,
-                "assesment_employee": assesment_employee,
-            }
-    return render(request, "Employee/Enquiry/lead_list.html", context)
+    context = {
+        "enq": enq,
+        "user": user,
+        "dep": dep,
+        "presales_employees": presales_employees,
+        "sales_employees": sales_employees,
+        "documentation_employees": documentation_employees,
+        "visa_team": visa_team,
+        "lead": lead,
+        "assesment_employee": assesment_employee,
+    }
+    return render(request, "Employee/Enquiry/lead_list.html",context)
 
 
 @login_required

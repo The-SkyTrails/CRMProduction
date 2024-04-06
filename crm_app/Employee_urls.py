@@ -5,6 +5,7 @@ from .API_views import EmployeeWebsitePackage
 urlpatterns = [
     path("Dashboard/", employee_dashboard.as_view(), name="employee_dashboard"),
     path("AddEnquiry/", emp_Enquiry1View.as_view(), name="emp_enquiry_form1"),
+    path('select2/', include('django_select2.urls')),
     path("AddEnquiry2/", emp_Enquiry2View.as_view(), name="emp_enquiry_form2"),
     path("AddEnquiry3/", emp_Enquiry3View.as_view(), name="emp_enquiry_form3"),
     path("enquiry_form4/<int:id>/", empdocument, name="emp_enquiry_form4"),

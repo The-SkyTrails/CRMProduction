@@ -1,6 +1,8 @@
 from django import forms
 from django.core.validators import RegexValidator
 from .models import *
+from django_select2.forms import ModelSelect2Widget
+
 
 
 class VisaCountryForm(forms.ModelForm):
@@ -301,13 +303,16 @@ class EnquiryForm1(forms.ModelForm):
             "passport_no": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Enter Passport Number"}
             ),
-            "assign_to_agent": forms.Select(attrs={"class": "form-select"}),
+            # "assign_to_agent": forms.Select(attrs={"class": "form-select"}),
+            "assign_to_agent": ModelSelect2Widget(model=Agent, search_fields=['name__icontains'], attrs={"class": "form-select"}),
+           
         }
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             # Customize the Package field queryset if needed
             self.fields["Package"].queryset = Package.objects.all()
+            self.fields["assign_to_agent"].queryset = Agent.objects.all()
 
 
 class EnquiryForm2(forms.ModelForm):
