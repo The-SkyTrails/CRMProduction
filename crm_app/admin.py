@@ -12,6 +12,7 @@ admin.site.register(Enquiry)
 admin.site.register(Package)
 admin.site.register(SubAgent)
 admin.site.register(AgentSubAgentEmployee)
+admin.site.register(Agent)
 
 # class VisaCountryResource(resources.ModelResource):
 #     class Meta:

@@ -3,7 +3,6 @@ from django.core.validators import RegexValidator
 from .models import *
 
 
-
 class VisaCountryForm(forms.ModelForm):
     class Meta:
         model = VisaCountry
@@ -303,13 +302,13 @@ class EnquiryForm1(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Enter Passport Number"}
             ),
             "assign_to_agent": forms.Select(attrs={"class": "form-select"}),
-           
         }
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             # Customize the Package field queryset if needed
             self.fields["Package"].queryset = Package.objects.all()
+            self.fields["assign_to_agent"].queryset = Agent.objects.all()
 
 
 class EnquiryForm2(forms.ModelForm):

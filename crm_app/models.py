@@ -89,8 +89,8 @@ class Admin(models.Model):
     department = models.CharField(max_length=50)
     contact_no = models.CharField(max_length=10)
 
-    def __str__(self):
-        return self.users.first_name
+    # def __str__(self):
+    #     return self.users.first_name
 
 
 class VisaCountry(models.Model):
@@ -266,8 +266,8 @@ class Employee(models.Model):
             self.group.group_member.add(self.users)
         super(Employee, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return self.users.username
+    # def __str__(self):
+    #     return self.users.username
 
 
 marital_status = [
@@ -279,6 +279,7 @@ Gender = [
     ("Male", "Male"),
     ("Female", "Female"),
 ]
+
 
 
 class Agent(models.Model):
@@ -335,8 +336,8 @@ class Agent(models.Model):
         upload_to="Agent/Kyc", null=True, blank=True
     )
 
-    def __str__(self):
-        return f"{self.users.first_name} {self.users.last_name}"
+    # def __str__(self):
+    #     return f"{self.users.first_name} {self.users.last_name}"
 
 
 class OutSourcingAgent(models.Model):
@@ -391,8 +392,8 @@ class OutSourcingAgent(models.Model):
         upload_to="Agent/Kyc", null=True, blank=True
     )
 
-    def _str_(self):
-        return f"{self.users.first_name} {self.users.last_name}"
+    # def _str_(self):
+    #     return f"{self.users.first_name} {self.users.last_name}"
 
 
 
@@ -447,8 +448,8 @@ class SubAgent(models.Model):
     
     register_by = models.ForeignKey(CustomUser,on_delete=models.SET_NULL, null=True, blank=True,related_name="registered_subagents",)
 
-    def __str__(self):
-        return f"{self.users.first_name} {self.users.last_name}"
+    # def __str__(self):
+    #     return f"{self.users.first_name} {self.users.last_name}"
 
 
 
@@ -476,8 +477,8 @@ class AgentSubAgentEmployee(models.Model):
             self.group.group_member.add(self.users)
         super(AgentSubAgentEmployee, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return self.users.username
+    # def __str__(self):
+    #     return self.users.username
 
 
 

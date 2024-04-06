@@ -41,7 +41,7 @@ class apiVisaCategory(ModelViewSet):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Package.objects.filter(approval="True")
+    queryset = Package.objects.filter(approval="Yes")
     serializer_class = ProductSerializer
 
 
