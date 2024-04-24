@@ -282,6 +282,7 @@ Gender = [
 
 
 
+
 class Agent(models.Model):
 
     users = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
