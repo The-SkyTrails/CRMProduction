@@ -1,8 +1,6 @@
 from django import forms
 from django.core.validators import RegexValidator
 from .models import *
-from django_select2.forms import ModelSelect2Widget
-
 
 
 class VisaCountryForm(forms.ModelForm):
