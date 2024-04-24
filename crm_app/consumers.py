@@ -78,7 +78,7 @@ class ChatConsumer(WebsocketConsumer):
         )
 
     def disconnect(self, code):
-        print("Websocket Disconnected...", code)
+        print("Websocket Disconnected.....", code)
 
 
 #  --------------------------- Notification ----------------------

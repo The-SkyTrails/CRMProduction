@@ -336,8 +336,8 @@ class Agent(models.Model):
         upload_to="Agent/Kyc", null=True, blank=True
     )
 
-    # def __str__(self):
-    #     return f"{self.users.first_name} {self.users.last_name}"
+    def __str__(self):
+        return f"{self.users.first_name} {self.users.last_name}"
 
 
 class OutSourcingAgent(models.Model):

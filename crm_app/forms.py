@@ -303,8 +303,8 @@ class EnquiryForm1(forms.ModelForm):
             "passport_no": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Enter Passport Number"}
             ),
-            # "assign_to_agent": forms.Select(attrs={"class": "form-select"}),
-            "assign_to_agent": ModelSelect2Widget(model=Agent, search_fields=['name__icontains'], attrs={"class": "form-select"}),
+            "assign_to_agent": forms.Select(attrs={"class": "form-select"}),
+            # "assign_to_agent": ModelSelect2Widget(model=Agent, search_fields=['name__icontains'], attrs={"class": "form-select"}),
            
         }
 

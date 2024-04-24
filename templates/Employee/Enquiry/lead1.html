@@ -1,7 +1,7 @@
 {% extends "Employee/Base/base.html" %}
 
 {% load static %}
-{% block extra_head %}
+{% comment %} {% block extra_head %}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
@@ -12,7 +12,7 @@
       $('#id_assign_to_agent').select2();
     });
   </script>
-{% endblock extra_head %}
+{% endblock extra_head %} {% endcomment %}
 
 {% block main-content %}
 <div class="form-container">
@@ -178,7 +178,7 @@
                  <label for="exampleFormControlInput1" class="custom-form-label">Agent Reference(Optional)</label>
                  {{form.assign_to_agent}}
               </div>
-              {% comment %}
+              
               <div class="col-md-6 ">
                  <a href="{% url "lead_emp_add_agent" %}">
                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -188,7 +188,7 @@
                  </a>
               </div>
            </div>
-           {% endcomment %}
+           
            
            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
               <button class="btn btn-color" type="submit">
