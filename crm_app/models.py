@@ -860,6 +860,10 @@ class Enquiry(models.Model):
 
     class Meta:
         db_table = "Enquiry"
+        indexes = [
+            models.Index(fields=['id'], name='enquiry_id_index'),
+            # Add indexes for other frequently queried fields if needed
+        ]
 
     def save(self, *args, **kwargs):
         if not self.enquiry_number:

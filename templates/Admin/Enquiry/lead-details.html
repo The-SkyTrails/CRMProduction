@@ -229,7 +229,7 @@
                         <th>CREATED BY</th>
                         <th>Assigned TO</th>
                         <th>Update Assigned To</th>
-                        <th>Assign to Agent/OP</th>
+                        {% comment %} <th>Assign to Agent/OP</th> {% endcomment %}
                         <th>LEAD status</th>
                         <th>Lead Updated</th>
                         <th>Appointment</th>
@@ -242,7 +242,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for i in enquiry %}
+                    {% for i in page %}
                     {% if i.archive == False %}
                     <tr style="background-color: {% if i.color_code == 'Grey' %}#efe5e5{% elif i.color_code == 'Blue' %}#89CFF0{% elif i.color_code == 'White' %}#FAF9F6{% elif i.color_code == 'Red' %}#ff9090{% elif i.color_code == 'Green' %}#9cc599{% else %}Transparent{% endif %};">
                         <td>{{forloop.counter}}</td>
@@ -331,7 +331,7 @@
 
                               {% include "Admin/Enquiry/assigned_to_employee_modal.html" %}
                         </td>
-                        <td>
+                        {% comment %} <td>
                             
                             <button type="button" class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#agentModal-{{i.id}}" style="background-color: darkcyan; color:white;">
                                 Assigned To Agent
@@ -344,7 +344,7 @@
                               </button>
                               {% include "Admin/Enquiry/assigned_to_op_modal.html" %}
                            
-                        </td>
+                        </td> {% endcomment %}
                         <td>
                             <span class="badge rounded-pill1">{{i.lead_status}}</span>
                         </td>
@@ -460,11 +460,11 @@
             
         </div>
         <div class="pagination" style="display: flex;justify-content:space-between;margin:10px;">
-                <div class="pages">
+                {% comment %} <div class="pages">
                     <span class="current">
                         Showing 1- {{ enquiry.number }} of {{ enquiry.paginator.num_pages }}
                     </span>
-                </div>
+                </div> {% endcomment %}
                 <div class="next">
                     <span class="step-links" style="margin: 4px;">
                         {% if enquiry.has_previous %}
@@ -474,16 +474,39 @@
                               </svg></a>
                         {% endif %}
                 
-                        <span class="current" style="border: 1px solid grey;padding:4px;">
+                        {% comment %} <span class="current" style="border: 1px solid grey;padding:4px;">
                             {{ enquiry.number }}
-                        </span>
+                        </span> {% endcomment %}
                 
-                        {% if enquiry.has_next %}
+                        {% comment %} {% if enquiry.has_next %}
                             <a href="?page={{ enquiry.next_page_number }}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 20 21" fill="none">
                                 <path d="M7.78925 16.3334C7.56997 16.3334 7.35563 16.265 7.17332 16.137C6.99101 16.0089 6.84892 15.827 6.76501 15.6141C6.6811 15.4012 6.65914 15.1669 6.70191 14.9409C6.74467 14.7149 6.85024 14.5073 7.00528 14.3444L10.6568 10.5072L7.00528 6.67012C6.89937 6.56263 6.81489 6.43406 6.75677 6.29189C6.69866 6.14973 6.66807 5.99683 6.66679 5.84211C6.66551 5.68739 6.69357 5.53395 6.74932 5.39075C6.80508 5.24755 6.88742 5.11744 6.99153 5.00804C7.09565 4.89863 7.21946 4.81211 7.35573 4.75352C7.49201 4.69493 7.63803 4.66545 7.78526 4.66679C7.9325 4.66814 8.07801 4.70028 8.21329 4.76135C8.34858 4.82242 8.47094 4.91119 8.57323 5.02248L13.0087 9.68342C13.2166 9.90193 13.3334 10.1983 13.3334 10.5072C13.3334 10.8162 13.2166 11.1125 13.0087 11.3311L8.57323 15.992C8.36532 16.2105 8.08332 16.3333 7.78925 16.3334Z" fill="#6B7280"/>
                               </svg></a>
                             
-                        {% endif %}
+                        {% endif %} {% endcomment %}
+
+                         <nav aria-label="Page navigation example">
+            <ul class="pagination">
+               {% if page.has_previous %}
+               <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+               <li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a></li>
+               {% endif %}
+               {% for num in page.paginator.page_range|slice:":3" %}
+               <li class="page-item{% if page.number == num %} active{% endif %}">
+                  <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+               </li>
+               {% endfor %}
+               {% if page.paginator.num_pages > 3 %}
+               <li class="page-item"><span class="page-link">...</span></li>
+               <li class="page-item"><a class="page-link" href="?page={{ page.paginator.num_pages }}">{{ page.paginator.num_pages }}</a></li>
+               {% endif %}
+               {% if page.has_next %}
+               <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">Next</a></li>
+               <li class="page-item"><a class="page-link" href="?page={{ page.paginator.num_pages }}">Last</a></li>
+               <!-- Added "Last" button -->
+               {% endif %}
+            </ul>
+         </nav>
                     </span>
                 </div>
                 

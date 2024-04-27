@@ -2481,15 +2481,19 @@ def admin_new_leads_details(request):
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
 
     enquiry = Enquiry.objects.all().order_by("-id")
-    paginator = Paginator(enquiry, 10)
-    page = request.GET.get("page")
-    try:
-        enquiry = paginator.page(page)
-    except PageNotAnInteger:
-        enquiry = paginator.page(1)
-    except EmptyPage:
-        enquiry = paginator.page(paginator.num_pages)
+    
+    enquiry_list = Enquiry.objects.all().order_by("-id")
+    paginator = Paginator(enquiry_list, 10)
+    page_number = request.GET.get('page')
+    
 
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+    
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
     documentation_employees = get_documentation_team_employee()
@@ -2499,7 +2503,7 @@ def admin_new_leads_details(request):
     outsourcepartner = get_outsourcepartner()
 
     context = {
-        "enquiry": enquiry,
+        # "enquiry": enquiry,
         "presales_employees": presales_employees,
         "sales_employees": sales_employees,
         "documentation_employees": documentation_employees,
@@ -2508,6 +2512,7 @@ def admin_new_leads_details(request):
         "assesment_employee": assesment_employee,
         "agent": agent,
         "outsourcepartner": outsourcepartner,
+        "page": page,
     }
     return render(request, "Admin/Enquiry/lead-details.html", context)
 
@@ -2893,6 +2898,7 @@ def enrolled_Application(request):
         "lead": lead,
     }
     return render(request, "Admin/Enquiry/Enrolled Enquiry/Enrolledleads.html", context)
+
 
 
 class enrolledGrid_Application(LoginRequiredMixin, ListView):
