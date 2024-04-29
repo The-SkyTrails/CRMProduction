@@ -38,6 +38,10 @@ from collections import defaultdict
 from .doubletick import whatsapp_signup_mes, product_add_mes
 from .Email.email_utils import send_congratulatory_email, send_package_email
 
+from django.core.paginator import Paginator
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 class agent_dashboard(LoginRequiredMixin, TemplateView):
     template_name = "Agent/Dashboard/dashboard.html"
 
@@ -428,15 +432,32 @@ def agent_new_leads_details(request):
     faq_count = FAQ.objects.filter(user=user).count()
     user_type = user.user_type
     if user_type == "5":
-        enquiry = Enquiry.objects.filter(
+        enq_list = Enquiry.objects.filter(
             Q(assign_to_outsourcingagent=user.outsourcingagent) | Q(created_by=user)
         ).order_by("-id")
+        paginator = Paginator(enq_list, 10)
+        page_number = request.GET.get('page')
+        
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
     elif user_type == "4":
-        enquiry = Enquiry.objects.filter(
+        enq_list = Enquiry.objects.filter(
             Q(assign_to_agent=user.agent) | Q(created_by=user)
         ).order_by("-id")
-
-    context = {"enquiry": enquiry, "faq_count": faq_count, "lead": lead}
+        paginator = Paginator(enq_list, 10)
+        page_number = request.GET.get('page')
+        
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+    context = {"page": page, "faq_count": faq_count, "lead": lead}
 
     return render(request, "Agent/Enquiry/lead-details.html", context)
 

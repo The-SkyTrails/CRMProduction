@@ -1,20 +1,39 @@
 {% extends "Employee/Base/base.html" %}
 
 {% load static %}
-{% comment %} {% block extra_head %}
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-  <script>
-    jQuery(document).ready(function($) {
-      console.log("Document ready function called.");
-      // Initialize select2 for assign_to_agent field
-      $('#id_assign_to_agent').select2();
-    });
-  </script>
-{% endblock extra_head %} {% endcomment %}
 
 {% block main-content %}
+
+<style>
+   .search-select-container {
+      position: relative;
+  }
+  
+  .agent-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      list-style: none;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      padding: 0;
+      margin-top: 0;
+      display: none;
+  }
+  
+  .agent-dropdown li {
+      padding: 5px 10px;
+      cursor: pointer;
+  }
+  
+  .agent-dropdown li:hover {
+      background-color: #f0f0f0;
+  }
+  
+</style>
 <div class="form-container">
   <div class="custom-container">
      <div class="icon-container">
@@ -174,10 +193,15 @@
            </div>
            
            <div class="row formrow">
-              <div class="col-md-6 ">
-                 <label for="exampleFormControlInput1" class="custom-form-label">Agent Reference(Optional)</label>
-                 {{form.assign_to_agent}}
-              </div>
+              <div class="col-md-6">
+               <label for="agentSearchInput" class="custom-form-label">Agent Reference (Optional)</label>
+               <div class="search-select-container">
+                   <input type="text" id="agentSearchInput" name="agentSearchInput" class="form-control" placeholder="Search for agents...">
+                   <input type="hidden" id="agentIdInput" name="agentIdInput">
+                   <ul id="agentDropdown" class="agent-dropdown"></ul>
+               </div>
+           </div>
+           
               
               <div class="col-md-6 ">
                  <a href="{% url "lead_emp_add_agent" %}">
@@ -202,5 +226,50 @@
      </div> 
   </div>
 </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+<script>
+   // Function to fetch and populate agent dropdown options based on search input
+   function populateAgentDropdown(searchTerm) {
+      // Make an AJAX request to fetch agents based on the search term
+      $.ajax({
+         url: '/Employee/fetch_agents/',
+         method: 'GET',
+         data: { searchTerm: searchTerm },
+         success: function(response) {
+            // Clear existing options
+            $('#agentDropdown').empty();
+            // Append new options
+            response.forEach(function(agent) {
+               $('#agentDropdown').append('<li data-agent-id="' + agent.id + '">' + agent.name + '</li>');
+            });
+            // Show the dropdown
+            $('#agentDropdown').show();
+         }
+      });
+   }
+
+   // Event listener for input changes in the search field
+   $('#agentSearchInput').on('input', function() {
+      var searchTerm = $(this).val();
+      populateAgentDropdown(searchTerm);
+   });
+
+   // Event listener for agent selection
+   $(document).on('click', '#agentDropdown li', function() {
+      var agentId = $(this).data('agent-id');
+      var agentName = $(this).text();
+      // Set the selected agent ID in the hidden input field
+      $('#agentIdInput').val(agentId);
+      // Set the selected agent name in the visible input field
+      $('#agentSearchInput').val(agentName);
+      // Hide the dropdown
+      $('#agentDropdown').hide();
+  });
+
+</script>
+
 
 {% endblock main-content %}

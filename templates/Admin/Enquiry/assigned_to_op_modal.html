@@ -1,3 +1,35 @@
+<style>
+    .search-select-container {
+       position: relative;
+   }
+   
+   .agent-dropdown {
+       position: absolute;
+       top: 100%;
+       left: 0;
+       width: 100%;
+       z-index: 1000;
+       list-style: none;
+       background-color: #fff;
+       border: 1px solid #ccc;
+       border-top: none;
+       padding: 0;
+       margin-top: 0;
+       display: none;
+   }
+   
+   .agent-dropdown li {
+       padding: 5px 10px;
+       cursor: pointer;
+   }
+   
+   .agent-dropdown li:hover {
+       background-color: #f0f0f0;
+   }
+   
+ </style>
+
+
 <div class="modal fade" id="opModal-{{i.id}}" tabindex="-1" aria-labelledby="opModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <form action="{% url "update_assigned_op" i.id %}" method="post">
@@ -11,14 +43,11 @@
                 <hr>
                 <div class="modal-body">
                 <label class="custom-form-label" for="">Assigned To OutsourcePartner</label>
-                <select class="form-select" name="assign_to_outsourcingagent" id="assign_to_outsourcingagent">
-                    <option value="0">Select</option>
-                    
-                    {% for op in outsourcepartner %}
-                    
-                        <option value="{{ op.id }}" {% if enquiry.assign_to_outsourcingagent_id == op.id %}selected{% endif %}>{{ op.users }}</option>
-                    {% endfor %}
-                </select>
+                <div class="search-select-container">
+                    <input type="text" class="form-control agentSearchInput" placeholder="Search for agents...">
+                    <input type="hidden" class="agentIdInput" name="agentIdInput">
+                    <ul class="agent-dropdown"></ul>
+                </div>
                 
                 </div>
                 <div class="modal-footer">
@@ -62,6 +91,58 @@
                 var modalId = modal.getAttribute('id');
                 setRedirectTo(currentPath, modalId);
             });
+        });
+    });
+</script>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+<script>
+    
+    function populateAgentDropdown(searchTerm, dropdown) {
+        $.ajax({
+            url: '/Admin/fetch_outsourceagents/',
+            method: 'GET',
+            data: { searchTerm: searchTerm },
+            success: function(response) {
+                
+                dropdown.empty();
+                // Append new options
+                $.each(response, function(index, agent) {
+                    dropdown.append('<li data-agent-id="' + agent.id + '">' + agent.name + '</li>');
+                });
+                // Show the dropdown
+                dropdown.show();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching agents:', error);
+            }
+        });
+    }
+ 
+    $(document).ready(function() {
+        // Event listener for input changes in the search field
+        $(document).on('input', '.agentSearchInput', function() {
+            var searchTerm = $(this).val();
+            var dropdown = $(this).siblings('.agent-dropdown');
+            populateAgentDropdown(searchTerm, dropdown);
+        });
+ 
+        // Event listener for agent selection
+        $(document).on('click', '.agent-dropdown li', function() {
+            var agentId = $(this).data('agent-id');
+            var agentName = $(this).text();
+            var inputField = $(this).closest('.search-select-container').find('.agentSearchInput');
+            var hiddenInput = $(this).closest('.search-select-container').find('.agentIdInput');
+            
+            // Set the selected agent ID in the hidden input field
+            hiddenInput.val(agentId);
+            // Set the selected agent name in the visible input field
+            inputField.val(agentName);
+            // Hide the dropdown
+            $(this).closest('.agent-dropdown').hide();
         });
     });
 </script>

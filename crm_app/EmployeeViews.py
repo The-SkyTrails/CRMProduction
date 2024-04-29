@@ -41,6 +41,10 @@ from .notifications import (
     create_admin_notification,
 )
 
+from django.core.paginator import Paginator
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 def employee_query_list(request):
     user = request.user
@@ -370,13 +374,14 @@ class emp_Enquiry1View(LoginRequiredMixin, CreateView):
     def get(self, request):
         form = EnquiryForm1()
         user = request.user
-        print("user",user)
         dep = user.employee.department
         context = {"dep": dep, "form": form}
         return render(request, "Employee/Enquiry/lead1.html",context)
 
     def post(self, request):
         form = EnquiryForm1(request.POST)
+        agent_id = request.POST.get('agentIdInput')
+        
         if form.is_valid():
             cleaned_data = {
                 "FirstName": form.cleaned_data["FirstName"],
@@ -387,8 +392,14 @@ class emp_Enquiry1View(LoginRequiredMixin, CreateView):
                 "Gender": form.cleaned_data["Gender"],
                 "Country": form.cleaned_data["Country"],
                 "passport_no": form.cleaned_data["passport_no"],
+                "assign_to_agent":agent_id
+                
             }
+            
+                
+            print(cleaned_data)
             request.session["enquiry_form1"] = cleaned_data
+            
             return redirect("emp_enquiry_form2")
 
         return render(
@@ -483,14 +494,23 @@ class emp_Enquiry3View(LoginRequiredMixin, CreateView):
         if form3.is_valid():
             user = request.user
             form3.instance.assign_to_employee = user.employee
-            # Merge data from all three forms
+            
             merged_data = {
                 **form1_data,
                 **form2_data,
                 **form3.cleaned_data,
             }
+            
+            assign_to_agent_id = merged_data.get("assign_to_agent")
+            if assign_to_agent_id:
+                try:
+                    agent_instance = Agent.objects.get(id=assign_to_agent_id)
+                except Agent.DoesNotExist:
+                    agent_instance = None
+            else:
+                agent_instance = None
+            merged_data["assign_to_agent"] = agent_instance
 
-            # Save the merged data to the database
             enquiry = Enquiry(**merged_data)
 
             enquiry.created_by = self.request.user
@@ -616,33 +636,86 @@ def employee_lead_list(request):
             emp = user.employee
             dep = emp.department
             if dep == "Presales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     Q(assign_to_employee=user.employee) | Q(created_by=user)
                 ).order_by("-id")
-                print("enqqq",enq)
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Sales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     Q(assign_to_sales_employee=user.employee) | Q(created_by=user)
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
 
             elif dep == "Documentation":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     Q(assign_to_documentation_employee=user.employee)
                     | Q(created_by=user)
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Visa Team":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     Q(assign_to_visa_team_employee=user.employee) | Q(created_by=user)
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Assesment":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     Q(assign_to_assesment_employee=user.employee) | Q(created_by=user)
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             else:
-                enq = Enquiry.objects.filter(created_by=request.user)
+                enq_list = Enquiry.objects.filter(created_by=request.user)
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
 
     context = {
-        "enq": enq,
+        "page": page,
         "user": user,
         "dep": dep,
         "presales_employees": presales_employees,
@@ -4202,6 +4275,7 @@ class emp_PreEnquiry1View(LoginRequiredMixin, CreateView):
 
     def post(self, request):
         form = PreEnquiryForm1(request.POST)
+        agent_id = request.POST.get('agentIdInput')
         if form.is_valid():
             cleaned_data = {
                 "FirstName": form.cleaned_data["FirstName"],
@@ -4213,6 +4287,7 @@ class emp_PreEnquiry1View(LoginRequiredMixin, CreateView):
                 "Country": form.cleaned_data["Country"],
                 "passport_no": form.cleaned_data["passport_no"],
                 "lead_status": form.cleaned_data["lead_status"],
+                "assign_to_agent":agent_id
             }
             request.session["emp_Preenquiry_form1"] = cleaned_data
             return redirect("emp_Preenquiry_form2")
@@ -4315,6 +4390,16 @@ class emp_PreEnquiry3View(LoginRequiredMixin, CreateView):
                 **form2_data,
                 **form3.cleaned_data,
             }
+            
+            assign_to_agent_id = merged_data.get("assign_to_agent")
+            if assign_to_agent_id:
+                try:
+                    agent_instance = Agent.objects.get(id=assign_to_agent_id)
+                except Agent.DoesNotExist:
+                    agent_instance = None
+            else:
+                agent_instance = None
+            merged_data["assign_to_agent"] = agent_instance
 
             # Save the merged data to the database
             enquiry = Enquiry(**merged_data)
@@ -4502,49 +4587,103 @@ def employee_Enrolledlead_list(request):
             emp = user.employee
             dep = emp.department
             if dep == "Presales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (Q(assign_to_employee=user.employee) & (Q(lead_status="Enrolled")))
                     | (Q(created_by=user) & (Q(lead_status="Enrolled")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Sales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_sales_employee=user.employee)
                         & (Q(lead_status="Enrolled"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Enrolled")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Documentation":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_documentation_employee=user.employee)
                         & (Q(lead_status="Enrolled"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Enrolled")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Visa Team":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_visa_team_employee=user.employee)
                         & (Q(lead_status="Enrolled"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Enrolled")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Assesment":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_assesment_employee=user.employee)
                         & (Q(lead_status="Enrolled"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Enrolled")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             else:
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (Q(created_by=user) & (Q(lead_status="Enrolled")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
 
             context = {
-                "enq": enq,
+                "page": page,
                 "user": user,
                 "dep": dep,
                 "presales_employees": presales_employees,
@@ -4575,7 +4714,7 @@ def employee_inprocesslead_list(request):
             emp = user.employee
             dep = emp.department
             if dep == "Presales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_employee=user.employee)
                         & (
@@ -4591,8 +4730,17 @@ def employee_inprocesslead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Sales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_sales_employee=user.employee)
                         & (
@@ -4608,8 +4756,17 @@ def employee_inprocesslead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Documentation":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_documentation_employee=user.employee)
                         & (
@@ -4625,8 +4782,17 @@ def employee_inprocesslead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Visa Team":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_visa_team_employee=user.employee)
                         & (
@@ -4642,8 +4808,17 @@ def employee_inprocesslead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Assesment":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_assesment_employee=user.employee)
                         & (
@@ -4659,8 +4834,17 @@ def employee_inprocesslead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             else:
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(created_by=user)
                         & (
@@ -4669,9 +4853,18 @@ def employee_inprocesslead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
 
             context = {
-                "enq": enq,
+                "page": page,
                 "user": user,
                 "dep": dep,
                 "presales_employees": presales_employees,
@@ -4702,7 +4895,7 @@ def employee_appointlead_list(request):
             emp = user.employee
             dep = emp.department
             if dep == "Presales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_employee=user.employee)
                         & (
@@ -4718,8 +4911,17 @@ def employee_appointlead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Sales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_sales_employee=user.employee)
                         & (
@@ -4735,8 +4937,17 @@ def employee_appointlead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Documentation":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_documentation_employee=user.employee)
                         & (
@@ -4752,8 +4963,17 @@ def employee_appointlead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Visa Team":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_visa_team_employee=user.employee)
                         & (
@@ -4769,8 +4989,17 @@ def employee_appointlead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Assesment":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_assesment_employee=user.employee)
                         & (
@@ -4786,8 +5015,17 @@ def employee_appointlead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             else:
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(created_by=user)
                         & (
@@ -4796,9 +5034,18 @@ def employee_appointlead_list(request):
                         )
                     )
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
 
             context = {
-                "enq": enq,
+                "page": page,
                 "user": user,
                 "dep": dep,
                 "presales_employees": presales_employees,
@@ -4827,49 +5074,103 @@ def employee_Resultlead_list(request):
             emp = user.employee
             dep = emp.department
             if dep == "Presales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (Q(assign_to_employee=user.employee) & (Q(lead_status="Result")))
                     | (Q(created_by=user) & (Q(lead_status="Result")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Sales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_sales_employee=user.employee)
                         & (Q(lead_status="Result"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Result")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Documentation":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_documentation_employee=user.employee)
                         & (Q(lead_status="Result"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Result")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Visa Team":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_visa_team_employee=user.employee)
                         & (Q(lead_status="Result"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Result")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Assesment":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_assesment_employee=user.employee)
                         & (Q(lead_status="Result"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Result")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             else:
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (Q(created_by=user) & (Q(lead_status="Result")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
 
             context = {
-                "enq": enq,
+                "page": page,
                 "user": user,
                 "dep": dep,
                 "presales_employees": presales_employees,
@@ -4898,49 +5199,102 @@ def employee_Deliverylead_list(request):
             emp = user.employee
             dep = emp.department
             if dep == "Presales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (Q(assign_to_employee=user.employee) & (Q(lead_status="Delivery")))
                     | (Q(created_by=user) & (Q(lead_status="Delivery")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Sales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_sales_employee=user.employee)
                         & (Q(lead_status="Delivery"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Delivery")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Documentation":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_documentation_employee=user.employee)
                         & (Q(lead_status="Delivery"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Delivery")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Visa Team":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_visa_team_employee=user.employee)
                         & (Q(lead_status="Delivery"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Delivery")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Assesment":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_assesment_employee=user.employee)
                         & (Q(lead_status="Delivery"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="Delivery")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             else:
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (Q(created_by=user) & (Q(lead_status="Delivery")))
                 ).order_by("-id")
-
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             context = {
-                "enq": enq,
+                "page": page,
                 "user": user,
                 "dep": dep,
                 "presales_employees": presales_employees,
@@ -4971,49 +5325,103 @@ def employee_Latestlead_list(request):
             emp = user.employee
             dep = emp.department
             if dep == "Presales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (Q(assign_to_employee=user.employee) & (Q(lead_status="New Lead")))
                     | (Q(created_by=user) & (Q(lead_status="New Lead")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Sales":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_sales_employee=user.employee)
                         & (Q(lead_status="New Lead"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="New Lead")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Documentation":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_documentation_employee=user.employee)
                         & (Q(lead_status="New Lead"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="New Lead")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Visa Team":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_visa_team_employee=user.employee)
                         & (Q(lead_status="New Lead"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="New Lead")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             elif dep == "Assesment":
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (
                         Q(assign_to_assesment_employee=user.employee)
                         & (Q(lead_status="New Lead"))
                     )
                     | (Q(created_by=user) & (Q(lead_status="New Lead")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
             else:
-                enq = Enquiry.objects.filter(
+                enq_list = Enquiry.objects.filter(
                     (Q(created_by=user) & (Q(lead_status="New Lead")))
                 ).order_by("-id")
+                paginator = Paginator(enq_list, 10)
+                page_number = request.GET.get('page')
+                
+                try:
+                    page = paginator.page(page_number)
+                except PageNotAnInteger:
+                    page = paginator.page(1)
+                except EmptyPage:
+                    page = paginator.page(paginator.num_pages)
 
             context = {
-                "enq": enq,
+                "page": page,
                 "user": user,
                 "dep": dep,
                 "presales_employees": presales_employees,
@@ -5149,3 +5557,12 @@ def update_assigned_employee(request, id):
             return HttpResponseRedirect(reverse("employee_Deliverylead_list"))
         else:
             return HttpResponseRedirect(reverse("employee_lead_list"))
+
+
+
+
+def fetch_agents(request):
+    search_term = request.GET.get('searchTerm', '')
+    agents = Agent.objects.filter(users__first_name__icontains=search_term)
+    agents_list = [{'id': agent.id, 'name': f"{agent.users.first_name} {agent.users.last_name}"} for agent in agents]
+    return JsonResponse(agents_list, safe=False)

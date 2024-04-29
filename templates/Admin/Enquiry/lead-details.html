@@ -237,8 +237,7 @@
                         <th>NOTES</th>
                         <th>Colour Code</th>
                         <th>ACTION</th>
-                        {% comment %} <th>ddddd</th> {% endcomment %}
-                        {% comment %} <th>Approval Status</th> {% endcomment %}
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -515,7 +514,7 @@
     </div>
     
 </div>
-{% for i in enquiry %}
+{% for i in page %}
 {% include "Admin/Enquiry/view_notes_modal.html" %}
 {% endfor %}
 

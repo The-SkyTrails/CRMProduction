@@ -4,6 +4,13 @@
     .custom-form-label{
         margin-bottom:5px;
     }
+    .dataTables_wrapper .dataTables_info {
+        display: none !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        display: none !important;
+      }
 </style>
 <div class="form-container">
     <div class="custom-container">
@@ -238,7 +245,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for i in enq  %}
+                    {% for i in page  %}
                     {% if i.archive == False %}
                     <tr style="background-color: {% if dep == 'Documentation' or dep == 'Visa Team' %}{% if i.color_code == 'Grey' %}#efe5e5{% elif i.color_code == 'Blue' %}#89CFF0{% elif i.color_code == 'White' %}#FAF9F6{% elif i.color_code == 'Red' %}#ff9090{% elif i.color_code == 'Green' %}#9cc599{% endif %}{% else %}Transparent{% endif %};">
 
@@ -638,6 +645,7 @@
                 </tbody>
             </table>
         </div>
+       
     </div>
 </div>
 

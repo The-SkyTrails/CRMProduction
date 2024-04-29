@@ -1,6 +1,38 @@
 {% extends "Employee/Base/base.html" %}
 {% load static %}
 {% block main-content %}
+
+<style>
+  .search-select-container {
+     position: relative;
+ }
+ 
+ .agent-dropdown {
+     position: absolute;
+     top: 100%;
+     left: 0;
+     width: 100%;
+     z-index: 1000;
+     list-style: none;
+     background-color: #fff;
+     border: 1px solid #ccc;
+     border-top: none;
+     padding: 0;
+     margin-top: 0;
+     display: none;
+ }
+ 
+ .agent-dropdown li {
+     padding: 5px 10px;
+     cursor: pointer;
+ }
+ 
+ .agent-dropdown li:hover {
+     background-color: #f0f0f0;
+ }
+ 
+</style>
+
 <div class="form-container">
   <div class="custom-container">
       <div class="icon-container">
@@ -165,7 +197,12 @@
                     <path d="M7.99998 3.33334V8.00001M7.99998 8.00001V12.6667M7.99998 8.00001H12.6666M7.99998 8.00001H3.33331" stroke="#1A56DB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg> Add Agent
                 </a></label>
-                {{form.assign_to_agent}}
+                
+               <div class="search-select-container">
+                   <input type="text" id="agentSearchInput" name="agentSearchInput" class="form-control" placeholder="Search for agents...">
+                   <input type="hidden" id="agentIdInput" name="agentIdInput">
+                   <ul id="agentDropdown" class="agent-dropdown"></ul>
+               </div>
             </div>  
             <!-- <div class="col-md-1">
               
@@ -189,5 +226,50 @@
       
   </div>
 </div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+<script>
+   // Function to fetch and populate agent dropdown options based on search input
+   function populateAgentDropdown(searchTerm) {
+      // Make an AJAX request to fetch agents based on the search term
+      $.ajax({
+         url: '/Employee/fetch_agents/',
+         method: 'GET',
+         data: { searchTerm: searchTerm },
+         success: function(response) {
+            // Clear existing options
+            $('#agentDropdown').empty();
+            // Append new options
+            response.forEach(function(agent) {
+               $('#agentDropdown').append('<li data-agent-id="' + agent.id + '">' + agent.name + '</li>');
+            });
+            // Show the dropdown
+            $('#agentDropdown').show();
+         }
+      });
+   }
+
+   // Event listener for input changes in the search field
+   $('#agentSearchInput').on('input', function() {
+      var searchTerm = $(this).val();
+      populateAgentDropdown(searchTerm);
+   });
+
+   // Event listener for agent selection
+   $(document).on('click', '#agentDropdown li', function() {
+      var agentId = $(this).data('agent-id');
+      var agentName = $(this).text();
+      // Set the selected agent ID in the hidden input field
+      $('#agentIdInput').val(agentId);
+      // Set the selected agent name in the visible input field
+      $('#agentSearchInput').val(agentName);
+      // Hide the dropdown
+      $('#agentDropdown').hide();
+  });
+
+</script>
 
 {% endblock main-content %}

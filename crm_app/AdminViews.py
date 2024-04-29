@@ -2479,8 +2479,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 def admin_new_leads_details(request):
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
-
-    enquiry = Enquiry.objects.all().order_by("-id")
     
     enquiry_list = Enquiry.objects.all().order_by("-id")
     paginator = Paginator(enquiry_list, 10)
@@ -2522,17 +2520,17 @@ def update_assigned_agent(request, id):
     enquiry = Enquiry.objects.get(id=id)
     if request.method == "POST":
         try:
-            assign_to_agent = request.POST.get("assign_to_agent")
+            assign_to_agent = request.POST.get("agentIdInput")
             agent = Agent.objects.get(id=assign_to_agent)
             enquiry.assign_to_agent = agent
 
             agent_id = agent.id
             create_notification_agent(agent, "New Lead Assign Added")
 
-            current_count = Notification.objects.filter(
-                is_seen=False, agent=agent_id
-            ).count()
-            assign_notification(agent_id, "New Lead Assign Added", current_count)
+            # current_count = Notification.objects.filter(
+            #     is_seen=False, agent=agent_id
+            # ).count()
+            # assign_notification(agent_id, "New Lead Assign Added", current_count)
 
         except Agent.DoesNotExist:
             if enquiry.assign_to_agent is None:
@@ -2566,8 +2564,8 @@ def update_assigned_op(request, id):
     enquiry = Enquiry.objects.get(id=id)
     if request.method == "POST":
         try:
-            assign_to_outsourcingagent = request.POST.get("assign_to_outsourcingagent")
-
+            assign_to_outsourcingagent = request.POST.get("agentIdInput")
+            
             outsourcepartner = OutSourcingAgent.objects.get(
                 id=assign_to_outsourcingagent
             )
@@ -2578,10 +2576,10 @@ def update_assigned_op(request, id):
                 outsourcepartner, "New Lead Assign Added"
             )
 
-            current_count = Notification.objects.filter(
-                is_seen=False, outsourceagent=assign_to_outsourcingagent
-            ).count()
-            assignop_notification(agent_id, "New Lead Assign Added", current_count)
+            # current_count = Notification.objects.filter(
+            #     is_seen=False, outsourceagent=assign_to_outsourcingagent
+            # ).count()
+            # assignop_notification(agent_id, "New Lead Assign Added", current_count)
 
         except OutSourcingAgent.DoesNotExist:
             if enquiry.assign_to_outsourcingagent is None:
@@ -2878,6 +2876,17 @@ def enrolled_Application(request):
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
     enquiry = Enquiry.objects.filter(lead_status="Enrolled").order_by("-id")
 
+    enquiry_list = Enquiry.objects.filter(lead_status="Enrolled").order_by("-id")
+    paginator = Paginator(enquiry_list, 10)
+    page_number = request.GET.get('page')
+    
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+    
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
     documentation_employees = get_documentation_team_employee()
@@ -2887,7 +2896,7 @@ def enrolled_Application(request):
     outsourcepartner = get_outsourcepartner()
 
     context = {
-        "enquiry": enquiry,
+        # "enquiry": enquiry,
         "presales_employees": presales_employees,
         "sales_employees": sales_employees,
         "documentation_employees": documentation_employees,
@@ -2896,6 +2905,7 @@ def enrolled_Application(request):
         "agent": agent,
         "outsourcepartner": outsourcepartner,
         "lead": lead,
+        "page": page,
     }
     return render(request, "Admin/Enquiry/Enrolled Enquiry/Enrolledleads.html", context)
 
@@ -4402,9 +4412,18 @@ def package_pdf(request, id):
 def admin_active_leads_details(request):
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
-    enquiry = Enquiry.objects.filter(
+    enquiry_list = Enquiry.objects.filter(
         Q(lead_status="Active") | Q(lead_status="PreEnrolled")
     ).order_by("-id")
+    paginator = Paginator(enquiry_list, 10)
+    page_number = request.GET.get('page')
+    
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
 
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
@@ -4415,7 +4434,7 @@ def admin_active_leads_details(request):
     outsourcepartner = get_outsourcepartner()
 
     context = {
-        "enquiry": enquiry,
+        "page": page,
         "presales_employees": presales_employees,
         "sales_employees": sales_employees,
         "documentation_employees": documentation_employees,
@@ -4432,7 +4451,17 @@ def admin_active_leads_details(request):
 def admin_latest_leads_details(request):
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
-    enquiry = Enquiry.objects.filter(lead_status="New Lead").order_by("-id")
+    enquiry_list = Enquiry.objects.filter(lead_status="New Lead").order_by("-id")
+    
+    paginator = Paginator(enquiry_list, 10)
+    page_number = request.GET.get('page')
+    
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
 
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
@@ -4443,7 +4472,7 @@ def admin_latest_leads_details(request):
     outsourcepartner = get_outsourcepartner()
 
     context = {
-        "enquiry": enquiry,
+        "page": page,
         "presales_employees": presales_employees,
         "sales_employees": sales_employees,
         "documentation_employees": documentation_employees,
@@ -4460,9 +4489,19 @@ def admin_latest_leads_details(request):
 def admin_inprocess_leads_details(request):
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
-    enquiry = Enquiry.objects.filter(
+    enquiry_list = Enquiry.objects.filter(
         Q(lead_status="Inprocess") | Q(lead_status="Ready To Submit")
     ).order_by("-id")
+    
+    paginator = Paginator(enquiry_list, 10)
+    page_number = request.GET.get('page')
+    
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
 
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
@@ -4473,7 +4512,7 @@ def admin_inprocess_leads_details(request):
     outsourcepartner = get_outsourcepartner()
 
     context = {
-        "enquiry": enquiry,
+        "page": page,
         "presales_employees": presales_employees,
         "sales_employees": sales_employees,
         "documentation_employees": documentation_employees,
@@ -4490,9 +4529,19 @@ def admin_inprocess_leads_details(request):
 def admin_appointment_leads_details(request):
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
-    enquiry = Enquiry.objects.filter(
+    enquiry_list = Enquiry.objects.filter(
         Q(lead_status="Appointment") | Q(lead_status="Ready To Collection")
     ).order_by("-id")
+
+    paginator = Paginator(enquiry_list, 10)
+    page_number = request.GET.get('page')
+    
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
 
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
@@ -4503,7 +4552,7 @@ def admin_appointment_leads_details(request):
     outsourcepartner = get_outsourcepartner()
 
     context = {
-        "enquiry": enquiry,
+        "page": page,
         "presales_employees": presales_employees,
         "sales_employees": sales_employees,
         "documentation_employees": documentation_employees,
@@ -4520,7 +4569,17 @@ def admin_appointment_leads_details(request):
 def admin_deleivered_leads_details(request):
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
-    enquiry = Enquiry.objects.filter(lead_status="Result").order_by("-id")
+    enquiry_list = Enquiry.objects.filter(lead_status="Result").order_by("-id")
+    
+    paginator = Paginator(enquiry_list, 10)
+    page_number = request.GET.get('page')
+    
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
 
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
@@ -4531,7 +4590,7 @@ def admin_deleivered_leads_details(request):
     outsourcepartner = get_outsourcepartner()
 
     context = {
-        "enquiry": enquiry,
+        "page": page,
         "presales_employees": presales_employees,
         "sales_employees": sales_employees,
         "documentation_employees": documentation_employees,
@@ -4548,7 +4607,17 @@ def admin_deleivered_leads_details(request):
 def admin_completed_leads_details(request):
     excluded_statuses = ["Accept", "Case Initiated"]
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
-    enquiry = Enquiry.objects.filter(lead_status="Delivery").order_by("-id")
+    enquiry_list = Enquiry.objects.filter(lead_status="Delivery").order_by("-id")
+    
+    paginator = Paginator(enquiry_list, 10)
+    page_number = request.GET.get('page')
+    
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
 
     presales_employees = get_presale_employee()
     sales_employees = get_sale_employee()
@@ -4559,7 +4628,7 @@ def admin_completed_leads_details(request):
     outsourcepartner = get_outsourcepartner()
 
     context = {
-        "enquiry": enquiry,
+        "page": page,
         "presales_employees": presales_employees,
         "sales_employees": sales_employees,
         "documentation_employees": documentation_employees,
@@ -4581,3 +4650,11 @@ def admin_subagent_list(request):
         'subagent':subagent
         }
     return render(request,'Admin/SubAgent/subagentlist.html',context)
+
+
+
+# def fetch_outsourceagents(request):
+#     search_term = request.GET.get('searchTerm', '')
+#     outsourceagents = OutSourcingAgent.objects.filter(users__first_name__icontains=search_term)
+#     outsourceagents_list = [{'id': outsourceagent.id, 'name': f"{outsourceagent.users.first_name} {outsourceagent.users.last_name}"} for outsourceagent in outsourceagents]
+#     return JsonResponse(outsourceagents_list, safe=False)

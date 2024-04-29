@@ -305,6 +305,7 @@ urlpatterns = [
     ),
 
     path("SubAgent/List", admin_subagent_list, name="admin_subagent_list"),
+    # path('fetch_outsourceagents/', fetch_outsourceagents, name='fetch_outsourceagents'),
     
 
 
