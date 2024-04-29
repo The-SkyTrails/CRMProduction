@@ -229,7 +229,7 @@
                         <th>CREATED BY</th>
                         <th>Assigned TO</th>
                         <th>Update Assigned To</th>
-                        {% comment %} <th>Assign to Agent/OP</th> {% endcomment %}
+                        <th>Assign to Agent/OP</th>
                         <th>LEAD status</th>
                         <th>Lead Updated</th>
                         <th>Appointment</th>
@@ -330,7 +330,7 @@
 
                               {% include "Admin/Enquiry/assigned_to_employee_modal.html" %}
                         </td>
-                        {% comment %} <td>
+                        <td>
                             
                             <button type="button" class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#agentModal-{{i.id}}" style="background-color: darkcyan; color:white;">
                                 Assigned To Agent
@@ -343,7 +343,7 @@
                               </button>
                               {% include "Admin/Enquiry/assigned_to_op_modal.html" %}
                            
-                        </td> {% endcomment %}
+                        </td>
                         <td>
                             <span class="badge rounded-pill1">{{i.lead_status}}</span>
                         </td>

@@ -4652,9 +4652,32 @@ def admin_subagent_list(request):
     return render(request,'Admin/SubAgent/subagentlist.html',context)
 
 
+def search(request):
+    return render(request,'Admin/search.html')
 
-# def fetch_outsourceagents(request):
-#     search_term = request.GET.get('searchTerm', '')
-#     outsourceagents = OutSourcingAgent.objects.filter(users__first_name__icontains=search_term)
-#     outsourceagents_list = [{'id': outsourceagent.id, 'name': f"{outsourceagent.users.first_name} {outsourceagent.users.last_name}"} for outsourceagent in outsourceagents]
-#     return JsonResponse(outsourceagents_list, safe=False)
+def agent_search_view(request):
+   
+    query = request.GET.get("q", "")  # The search query from the dropdown
+    # Fetch a limited number of agents that match the query
+    agents = Agent.objects.filter(
+        Q(users__first_name__icontains=query) |  # Match on first name
+        Q(users__last_name__icontains=query)    # Match on last name
+              # Match on agent type
+    )[:10]  # Limit results to avoid too many results at once
+
+    # Format the response for Select2
+    results = [
+        {
+            "id": agent.id,
+            "text": f"{agent.users.first_name} {agent.users.last_name} - {agent.type}",  # How results appear in the dropdown
+        }
+        for agent in agents
+    ]
+
+    return JsonResponse({"results": results})
+
+def fetch_outsourceagents(request):
+    search_term = request.GET.get('searchTerm', '')
+    outsourceagents = OutSourcingAgent.objects.filter(users__first_name__icontains=search_term)
+    outsourceagents_list = [{'id': outsourceagent.id, 'name': f"{outsourceagent.users.first_name} {outsourceagent.users.last_name}"} for outsourceagent in outsourceagents]
+    return JsonResponse(outsourceagents_list, safe=False)
