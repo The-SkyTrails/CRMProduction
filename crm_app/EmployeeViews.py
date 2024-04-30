@@ -1281,11 +1281,12 @@ def emp_add_agent(request):
 
     return render(request, "Employee/Agent Management/addagent.html", context)
 
-
 class emp_all_agent(ListView):
     model = Agent
     template_name = "Employee/Agent Management/agentlist.html"
     context_object_name = "agent"
+    paginate_by = 10
+
 
     def get_queryset(self):
         user = self.request.user.employee
@@ -1299,8 +1300,22 @@ class emp_all_agent(ListView):
         dep = user.employee.department
         context["employee_queryset"] = Employee.objects.all()
         context["dep"] = dep
-        return context
+        
+        agent_list = self.get_queryset()
+        paginator = Paginator(agent_list, self.paginate_by)
+        page_number = self.request.GET.get('page')
 
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+
+        context['page_obj'] = page
+        context['page'] = page.object_list  
+        
+        return context
 
 class emp_allGrid_agent(ListView):
     model = Agent
@@ -1496,6 +1511,8 @@ class emp_all_outsource_agent(ListView):
     model = OutSourcingAgent
     template_name = "Employee/Agent Management/outsourcelist.html"
     context_object_name = "agentoutsource"
+    paginate_by = 10
+
 
     def get_queryset(self):
         user = self.request.user.employee
@@ -1507,6 +1524,20 @@ class emp_all_outsource_agent(ListView):
         dep = user.employee.department
         context["dep"] = dep
         context["employee_queryset"] = Employee.objects.all()
+        
+        agentoutsource_list = self.get_queryset()
+        paginator = Paginator(agentoutsource_list, self.paginate_by)
+        page_number = self.request.GET.get('page')
+
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+
+        context['page_obj'] = page
+        context['page'] = page.object_list  
 
         return context
 
@@ -3238,24 +3269,37 @@ def add_employee(request):
     context = {"branch": branches, "group": groups, "dep": dep}
     return render(request, "Employee/Employee Management/addemp1.html", context)
 
-
 class all_employee(LoginRequiredMixin, ListView):
     model = Employee
     template_name = "Employee/Employee Management/Employeelist.html"
     context_object_name = "employee"
+    paginate_by = 10
 
     def get_queryset(self):
         return Employee.objects.order_by("-id")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        employee_list = self.get_queryset()
+        paginator = Paginator(employee_list, self.paginate_by)
+        page_number = self.request.GET.get('page')
+
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+
+        context['page_obj'] = page
+        context['page'] = page.object_list  
 
         user = self.request.user
         dep = user.employee.department
         context["dep"] = dep
 
         return context
-
 
 @login_required
 def employee_update(request, pk):

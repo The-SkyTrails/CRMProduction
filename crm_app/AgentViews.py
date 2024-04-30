@@ -2030,17 +2030,35 @@ def agent_add_employee(request):
     return render(request, "Agent/EmployeeManagement/addemp.html")
 
 
-
-
 class agent_emp_list(LoginRequiredMixin, ListView):
     model = AgentSubAgentEmployee
     template_name = "Agent/EmployeeManagement/Employeelist.html"
     context_object_name = "employee"
+    paginate_by = 10
+
 
     def get_queryset(self):
         return AgentSubAgentEmployee.objects.order_by("-id")
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        employee_list = self.get_queryset()
+        paginator = Paginator(employee_list, self.paginate_by)
+        page_number = self.request.GET.get('page')
 
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
 
+        context['page_obj'] = page
+        context['page'] = page.object_list 
+
+        return context
+        
 def agent_emp_edit(request, pk):
     employee = AgentSubAgentEmployee.objects.get(pk=pk)
     if request.method == "POST":

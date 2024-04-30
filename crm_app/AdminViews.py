@@ -1021,15 +1021,33 @@ def add_employee(request):
     context = {"branch": branches, "group": groups, "dep": dep}
     return render(request, "Admin/Employee Management/addemp1.html", context)
 
-
 class all_employee(LoginRequiredMixin, ListView):
     model = Employee
     template_name = "Admin/Employee Management/Employeelist.html"
     context_object_name = "employee"
+    paginate_by = 10
 
     def get_queryset(self):
         return Employee.objects.order_by("-id")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Pagination logic
+        employee_list = self.get_queryset()
+        paginator = Paginator(employee_list, self.paginate_by)
+        page_number = self.request.GET.get('page')
+
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+
+        context['page_obj'] = page
+        context['page'] = page.object_list  
+        return context
 
 @login_required
 def employee_update(request, pk):
@@ -1473,11 +1491,11 @@ def admin_agent_delete(request, id):
     agent = Agent.objects.get(id=id)
     kyc_id = AgentKyc.objects.get(agent=agent)
 
-
 class all_outsource_agent(LoginRequiredMixin, ListView):
     model = OutSourcingAgent
     template_name = "Admin/Agent Management/outsourcelist.html"
     context_object_name = "agentoutsource"
+    paginate_by = 10
 
     def get_queryset(self):
         return OutSourcingAgent.objects.all().order_by("-id")
@@ -1485,8 +1503,21 @@ class all_outsource_agent(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["employee_queryset"] = Employee.objects.all()
-        return context
+        
+        agentoutsource_list = self.get_queryset()
+        paginator = Paginator(agentoutsource_list, self.paginate_by)
+        page_number = self.request.GET.get('page')
 
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+
+        context['page_obj'] = page
+        context['page'] = page.object_list  
+        return context
 
 class Grid_outsource_agent(LoginRequiredMixin, ListView):
     model = OutSourcingAgent
