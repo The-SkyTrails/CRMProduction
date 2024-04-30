@@ -1260,6 +1260,7 @@ class all_agent(LoginRequiredMixin, ListView):
     model = Agent
     template_name = "Admin/Agent Management/agentlist.html"
     context_object_name = "agent"
+    paginate_by = 10
 
     def get_queryset(self):
         return Agent.objects.all().order_by("-id")
@@ -1267,8 +1268,22 @@ class all_agent(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["employee_queryset"] = Employee.objects.all()
-        return context
 
+        # Pagination logic
+        agent_list = self.get_queryset()
+        paginator = Paginator(agent_list, self.paginate_by)
+        page_number = self.request.GET.get('page')
+
+        try:
+            page = paginator.page(page_number)
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+
+        context['page_obj'] = page
+        context['page'] = page.object_list  
+        return context
 
 class Grid_agent(LoginRequiredMixin, ListView):
     model = Agent
@@ -1908,6 +1923,8 @@ class Enquiry1View(LoginRequiredMixin, CreateView):
 
     def post(self, request):
         form = EnquiryForm1(request.POST)
+        agent_id = request.POST.get('agent')
+        
         if form.is_valid():
             cleaned_data = {
                 "FirstName": form.cleaned_data["FirstName"],
@@ -1918,6 +1935,7 @@ class Enquiry1View(LoginRequiredMixin, CreateView):
                 "Gender": form.cleaned_data["Gender"],
                 "Country": form.cleaned_data["Country"],
                 "passport_no": form.cleaned_data["passport_no"],
+                "assign_to_agent":agent_id
             }
             request.session["enquiry_form1"] = cleaned_data
             return redirect("enquiry_form2")
@@ -2022,6 +2040,17 @@ class Enquiry3View(LoginRequiredMixin, CreateView):
                 **form2_data,
                 **form3.cleaned_data,
             }
+
+            assign_to_agent_id = merged_data.get("assign_to_agent")
+            if assign_to_agent_id:
+                try:
+                    agent_instance = Agent.objects.get(id=assign_to_agent_id)
+                except Agent.DoesNotExist:
+                    agent_instance = None
+            else:
+                agent_instance = None
+            merged_data["assign_to_agent"] = agent_instance
+
 
             # if "spouse_name" in form2_data:
             #     # Convert the input string into a list for spouse_name
@@ -4656,7 +4685,7 @@ def search(request):
     return render(request,'Admin/search.html')
 
 def agent_search_view(request):
-   
+    
     query = request.GET.get("q", "")  # The search query from the dropdown
     # Fetch a limited number of agents that match the query
     agents = Agent.objects.filter(
@@ -4677,7 +4706,14 @@ def agent_search_view(request):
     return JsonResponse({"results": results})
 
 def fetch_outsourceagents(request):
-    search_term = request.GET.get('searchTerm', '')
+    search_term = request.GET.get('searchTerms', '')
     outsourceagents = OutSourcingAgent.objects.filter(users__first_name__icontains=search_term)
-    outsourceagents_list = [{'id': outsourceagent.id, 'name': f"{outsourceagent.users.first_name} {outsourceagent.users.last_name}"} for outsourceagent in outsourceagents]
+    outsourceagents_list = [{'id': outagent.id, 'name': f"{outagent.users.first_name} {outagent.users.last_name}"} for outagent in outsourceagents]
     return JsonResponse(outsourceagents_list, safe=False)
+
+
+def fetch_agents(request):
+    search_term = request.GET.get('searchTerm', '')
+    agents = Agent.objects.filter(users__first_name__icontains=search_term)
+    agents_list = [{'id': agent.id, 'name': f"{agent.users.first_name} {agent.users.last_name}"} for agent in agents]
+    return JsonResponse(agents_list, safe=False)

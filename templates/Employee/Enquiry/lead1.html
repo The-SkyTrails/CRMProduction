@@ -4,36 +4,6 @@
 
 {% block main-content %}
 
-<style>
-   .search-select-container {
-      position: relative;
-  }
-  
-  .agent-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 100%;
-      z-index: 1000;
-      list-style: none;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-top: none;
-      padding: 0;
-      margin-top: 0;
-      display: none;
-  }
-  
-  .agent-dropdown li {
-      padding: 5px 10px;
-      cursor: pointer;
-  }
-  
-  .agent-dropdown li:hover {
-      background-color: #f0f0f0;
-  }
-  
-</style>
 <div class="form-container">
   <div class="custom-container">
      <div class="icon-container">
@@ -193,13 +163,10 @@
            </div>
            
            <div class="row formrow">
-              <div class="col-md-6">
-               <label for="agentSearchInput" class="custom-form-label">Agent Reference (Optional)</label>
-               <div class="search-select-container">
-                   <input type="text" id="agentSearchInput" name="agentSearchInput" class="form-control" placeholder="Search for agents...">
-                   <input type="hidden" id="agentIdInput" name="agentIdInput">
-                   <ul id="agentDropdown" class="agent-dropdown"></ul>
-               </div>
+               <div class="col-md-6 mb-2">
+                  <label for="exampleFormControlInput1" class="custom-form-label">Assign to Agent</label>
+                  <select id="agent-dropdown" style="width:100%;height:100%;"></select>  <!-- Dropdown for dynamic search -->
+              </div> 
            </div>
            
               
@@ -227,49 +194,31 @@
   </div>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 
 
 <script>
-   // Function to fetch and populate agent dropdown options based on search input
-   function populateAgentDropdown(searchTerm) {
-      // Make an AJAX request to fetch agents based on the search term
-      $.ajax({
-         url: '/Employee/fetch_agents/',
-         method: 'GET',
-         data: { searchTerm: searchTerm },
-         success: function(response) {
-            // Clear existing options
-            $('#agentDropdown').empty();
-            // Append new options
-            response.forEach(function(agent) {
-               $('#agentDropdown').append('<li data-agent-id="' + agent.id + '">' + agent.name + '</li>');
+        $(document).ready(function() {
+            $("#agent-dropdown").select2({
+                ajax: {
+                    url: "{% url 'agent_search' %}",  // AJAX endpoint
+                    dataType: "json",
+                    delay: 250,  // Delay to avoid too many requests
+                    data: function (params) {
+                        return {
+                            q: params.term  // User input
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results  // Populate the dropdown with matches
+                        };
+                    },
+                },
+                minimumInputLength: 1,  // Trigger AJAX after one character
+                placeholder: "Search for an Agent",  // Placeholder text
             });
-            // Show the dropdown
-            $('#agentDropdown').show();
-         }
-      });
-   }
-
-   // Event listener for input changes in the search field
-   $('#agentSearchInput').on('input', function() {
-      var searchTerm = $(this).val();
-      populateAgentDropdown(searchTerm);
-   });
-
-   // Event listener for agent selection
-   $(document).on('click', '#agentDropdown li', function() {
-      var agentId = $(this).data('agent-id');
-      var agentName = $(this).text();
-      // Set the selected agent ID in the hidden input field
-      $('#agentIdInput').val(agentId);
-      // Set the selected agent name in the visible input field
-      $('#agentSearchInput').val(agentName);
-      // Hide the dropdown
-      $('#agentDropdown').hide();
-  });
-
-</script>
-
+        });
+</script> 
 
 {% endblock main-content %}

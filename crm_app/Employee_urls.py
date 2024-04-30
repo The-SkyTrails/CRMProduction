@@ -330,4 +330,7 @@ urlpatterns = [
         update_assigned_employee,
         name="emp_update_assign_employee",
     ),
+
+    path("employee/agents/", emp_search_view, name="emp_search"),  # The endpoint for AJAX requests
+    
 ]

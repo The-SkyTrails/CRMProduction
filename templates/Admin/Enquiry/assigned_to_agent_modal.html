@@ -1,4 +1,3 @@
-
 <style>
     .search-select-container {
        position: relative;
@@ -108,7 +107,7 @@
         console.log("Fetching agents for search term:", searchTerm);
         // Make an AJAX request to fetch agents based on the search term
         $.ajax({
-            url: '/Employee/fetch_agents/',
+            url: '/Admin/fetch_agents/',
             method: 'GET',
             data: { searchTerm: searchTerm },
             success: function(response) {
@@ -152,6 +151,3 @@
         });
     });
 </script>
-
-
-

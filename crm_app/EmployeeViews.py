@@ -5566,3 +5566,27 @@ def fetch_agents(request):
     agents = Agent.objects.filter(users__first_name__icontains=search_term)
     agents_list = [{'id': agent.id, 'name': f"{agent.users.first_name} {agent.users.last_name}"} for agent in agents]
     return JsonResponse(agents_list, safe=False)
+
+
+
+
+def emp_search_view(request):
+    print("kkkkkkkkkkkkk")
+    query = request.GET.get("q", "")  # The search query from the dropdown
+    # Fetch a limited number of agents that match the query
+    agents = Agent.objects.filter(
+        Q(users__first_name__icontains=query) |  # Match on first name
+        Q(users__last_name__icontains=query)    # Match on last name
+              # Match on agent type
+    )[:10]  # Limit results to avoid too many results at once
+
+    # Format the response for Select2
+    results = [
+        {
+            "id": agent.id,
+            "text": f"{agent.users.first_name} {agent.users.last_name} - {agent.type}",  # How results appear in the dropdown
+        }
+        for agent in agents
+    ]
+
+    return JsonResponse({"results": results})

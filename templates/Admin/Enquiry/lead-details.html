@@ -206,6 +206,8 @@
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-color" style="margin-top: 20px;">Search</button>
                 </div>
+
+                <select id="agent-dropdown" name="agent" style="width:250px;"></select>  
             </div>
         </div>
     </form>
@@ -526,4 +528,29 @@
 </script>
 {% endif %}
 {% endfor %}
+
+
+<script>
+        $(document).ready(function() {
+            $("#agent-dropdown").select2({
+                ajax: {
+                    url: "{% url 'agent_search' %}",  // AJAX endpoint
+                    dataType: "json",
+                    delay: 250,  // Delay to avoid too many requests
+                    data: function (params) {
+                        return {
+                            q: params.term  // User input
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results  // Populate the dropdown with matches
+                        };
+                    },
+                },
+                minimumInputLength: 1,  // Trigger AJAX after one character
+                placeholder: "Search for an Agent",  // Placeholder text
+            });
+        });
+</script>
 {% endblock main-content %}

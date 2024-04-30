@@ -3,7 +3,7 @@
        position: relative;
    }
    
-   .agent-dropdown {
+   .outagent-dropdown {
        position: absolute;
        top: 100%;
        left: 0;
@@ -18,12 +18,12 @@
        display: none;
    }
    
-   .agent-dropdown li {
+   .outagent-dropdown li {
        padding: 5px 10px;
        cursor: pointer;
    }
    
-   .agent-dropdown li:hover {
+   .outagent-dropdown li:hover {
        background-color: #f0f0f0;
    }
    
@@ -44,9 +44,9 @@
                 <div class="modal-body">
                 <label class="custom-form-label" for="">Assigned To OutsourcePartner</label>
                 <div class="search-select-container">
-                    <input type="text" class="form-control agentSearchInput" placeholder="Search for agents...">
-                    <input type="hidden" class="agentIdInput" name="agentIdInput">
-                    <ul class="agent-dropdown"></ul>
+                    <input type="text" class="form-control outagentSearchInput" placeholder="Search for agents...">
+                    <input type="hidden" class="outagentIdInput" name="outagentIdInput">
+                    <ul class="outagent-dropdown"></ul>
                 </div>
                 
                 </div>
@@ -101,17 +101,17 @@
 
 <script>
     
-    function populateAgentDropdown(searchTerm, dropdown) {
+    function populateOutAgentDropdown(searchTerms, dropdown) {
         $.ajax({
             url: '/Admin/fetch_outsourceagents/',
             method: 'GET',
-            data: { searchTerm: searchTerm },
+            data: { searchTerms: searchTerms },
             success: function(response) {
                 
                 dropdown.empty();
                 // Append new options
-                $.each(response, function(index, agent) {
-                    dropdown.append('<li data-agent-id="' + agent.id + '">' + agent.name + '</li>');
+                $.each(response, function(index, outagent) {
+                    dropdown.append('<li data-outagent-id="' + outagent.id + '">' + outagent.name + '</li>');
                 });
                 // Show the dropdown
                 dropdown.show();
@@ -124,25 +124,25 @@
  
     $(document).ready(function() {
         // Event listener for input changes in the search field
-        $(document).on('input', '.agentSearchInput', function() {
-            var searchTerm = $(this).val();
-            var dropdown = $(this).siblings('.agent-dropdown');
-            populateAgentDropdown(searchTerm, dropdown);
+        $(document).on('input', '.outagentSearchInput', function() {
+            var searchTerms = $(this).val();
+            var dropdown = $(this).siblings('.outagent-dropdown');
+            populateOutAgentDropdown(searchTerms, dropdown);
         });
  
         // Event listener for agent selection
-        $(document).on('click', '.agent-dropdown li', function() {
-            var agentId = $(this).data('agent-id');
+        $(document).on('click', '.outagent-dropdown li', function() {
+            var agentId = $(this).data('outagent-id');
             var agentName = $(this).text();
-            var inputField = $(this).closest('.search-select-container').find('.agentSearchInput');
-            var hiddenInput = $(this).closest('.search-select-container').find('.agentIdInput');
+            var inputField = $(this).closest('.search-select-container').find('.outagentSearchInput');
+            var hiddenInput = $(this).closest('.search-select-container').find('.outagentIdInput');
             
             // Set the selected agent ID in the hidden input field
             hiddenInput.val(agentId);
             // Set the selected agent name in the visible input field
             inputField.val(agentName);
             // Hide the dropdown
-            $(this).closest('.agent-dropdown').hide();
+            $(this).closest('.outagent-dropdown').hide();
         });
     });
 </script>
