@@ -5615,7 +5615,7 @@ def fetch_agents(request):
 
 
 def emp_search_view(request):
-    print("kkkkkkkkkkkkk")
+   
     query = request.GET.get("q", "")  # The search query from the dropdown
     # Fetch a limited number of agents that match the query
     agents = Agent.objects.filter(
