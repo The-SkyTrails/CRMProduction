@@ -236,7 +236,7 @@
         $(document).ready(function() {
             $("#agent-dropdown").select2({
                 ajax: {
-                    url: "{% url 'agent_search' %}",  // AJAX endpoint
+                    url: "{% url 'emp_search' %}",  // AJAX endpoint
                     dataType: "json",
                     delay: 250,  // Delay to avoid too many requests
                     data: function (params) {
