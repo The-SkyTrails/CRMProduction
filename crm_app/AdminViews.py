@@ -2624,7 +2624,7 @@ def update_assigned_op(request, id):
     enquiry = Enquiry.objects.get(id=id)
     if request.method == "POST":
         try:
-            assign_to_outsourcingagent = request.POST.get("agentIdInput")
+            assign_to_outsourcingagent = request.POST.get("outagentIdInput")
             
             outsourcepartner = OutSourcingAgent.objects.get(
                 id=assign_to_outsourcingagent
@@ -4736,15 +4736,25 @@ def agent_search_view(request):
 
     return JsonResponse({"results": results})
 
-def fetch_outsourceagents(request):
-    search_term = request.GET.get('searchTerms', '')
-    outsourceagents = OutSourcingAgent.objects.filter(users__first_name__icontains=search_term)
-    outsourceagents_list = [{'id': outagent.id, 'name': f"{outagent.users.first_name} {outagent.users.last_name}"} for outagent in outsourceagents]
-    return JsonResponse(outsourceagents_list, safe=False)
 
+def outagent_search_view(request):
+    print("heloooooooooooooooooooo")
+    
+    query = request.GET.get("q", "")  # The search query from the dropdown
+    # Fetch a limited number of agents that match the query
+    outagents = OutSourcingAgent.objects.filter(
+        Q(users__first_name__icontains=query) |  # Match on first name
+        Q(users__last_name__icontains=query)    # Match on last name
+              # Match on agent type
+    )[:10]  # Limit results to avoid too many results at once
 
-def fetch_agents(request):
-    search_term = request.GET.get('searchTerm', '')
-    agents = Agent.objects.filter(users__first_name__icontains=search_term)
-    agents_list = [{'id': agent.id, 'name': f"{agent.users.first_name} {agent.users.last_name}"} for agent in agents]
-    return JsonResponse(agents_list, safe=False)
+    # Format the response for Select2
+    results = [
+        {
+            "id": outagent.id,
+            "text": f"{outagent.users.first_name} {outagent.users.last_name} - {outagent.type}",  # How results appear in the dropdown
+        }
+        for outagent in outagents
+    ]
+
+    return JsonResponse({"results": results})

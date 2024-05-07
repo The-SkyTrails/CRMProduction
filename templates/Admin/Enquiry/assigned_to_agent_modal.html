@@ -115,7 +115,7 @@
             
 
             // Check if the query length is at least 4 characters
-            if (query.length >= 4) {
+            if (query.length >= 3) {
                 $.ajax({
                     url: "{% url 'agent_search' %}",
                     data: { q: query },
@@ -140,9 +140,9 @@
             var $li = $(this);
             var agentName = $li.text();
             var agentId = $li.data("agent-id");
-            console.log("ddddd",agentId)
+            
             var id = $li.closest(".modal").attr("id").split("-")[1];
-            console.log("modal id",id)
+            
             $("#agent-search-" + id).val(agentName); // Set input value
             $("#agentid-" + id).val(agentId); 
         });

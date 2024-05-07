@@ -307,9 +307,7 @@ urlpatterns = [
     path("SubAgent/List", admin_subagent_list, name="admin_subagent_list"),
     path("Search/", search, name="search"),
     path("search/agents/", agent_search_view, name="agent_search"),  # The endpoint for AJAX requests
-    
-    path('fetch_outsourceagents/', fetch_outsourceagents, name='fetch_outsourceagents'),
-    path('fetch_agents/', fetch_agents, name='fetch_agents'),
+    path("search/outagents/", outagent_search_view, name="outagent_search"),
     
 
 

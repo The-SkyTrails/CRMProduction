@@ -1,38 +1,39 @@
 <style>
     .search-select-container {
-       position: relative;
-   }
-   
-   .outagent-dropdown {
-       position: absolute;
-       top: 100%;
-       left: 0;
-       width: 100%;
-       z-index: 1000;
-       list-style: none;
-       background-color: #fff;
-       border: 1px solid #ccc;
-       border-top: none;
-       padding: 0;
-       margin-top: 0;
-       display: none;
-   }
-   
-   .outagent-dropdown li {
-       padding: 5px 10px;
-       cursor: pointer;
-   }
-   
-   .outagent-dropdown li:hover {
-       background-color: #f0f0f0;
-   }
-   
- </style>
+        position: relative;
+    }
+
+    .agent-dropdownnn {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 50%;
+        z-index: 1000;
+        list-style: none;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-top: none;
+        padding: 0;
+        margin-top: 0;
+        
+        max-height: 200px; /* Optional: Set max height for dropdown */
+        overflow-y: auto; /* Optional: Add vertical scrollbar */
+    }
+
+    .agent-dropdownnn li {
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .agent-dropdown li:hover {
+        background-color: #f0f0f0;
+    }
+</style>
 
 
 <div class="modal fade" id="opModal-{{i.id}}" tabindex="-1" aria-labelledby="opModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form action="{% url "update_assigned_op" i.id %}" method="post">
+        <form action="{% url "update_assigned_op" i.id %}" method="post" autocomplete="off">
             {% csrf_token %}
             <input type="hidden" name="redirect_to" value="{% if request.path == '/ActiveLeads/' %}active_leads{% elif request.path == '/LatestLeads/' %}latest_leads{% elif request.path == '/InprocessLeads/' %}inprocess_leads{% elif request.path == '/AppointmentLeads/' %}appointment_leads{% elif request.path == '/DeliveredLeads/' %}delivered_leads{% elif request.path == '/CompletedLeads/' %}completed_leads{% elif request.path == '/EnrolledLeads/' %}enrolled_leads{% else %}new_leads{% endif %}">
             <div class="modal-content">
@@ -42,12 +43,17 @@
                 </div>
                 <hr>
                 <div class="modal-body">
-                <label class="custom-form-label" for="">Assigned To OutsourcePartner</label>
-                <div class="search-select-container">
-                    <input type="text" class="form-control outagentSearchInput" placeholder="Search for agents...">
-                    <input type="hidden" class="outagentIdInput" name="outagentIdInput">
-                    <ul class="outagent-dropdown"></ul>
-                </div>
+                    <label for="outagentSearchInput-{{i.id}}" class="custom-form-label">Assigned To OutsourcePartner</label>
+                       
+                    <div class="search-select-container">
+                        
+                        <input type="text" id="outagent-search-{{i.id}}" placeholder="Type to search for an OutsourcePartner" class="form-control"/>  <!-- Search input -->
+                        <input type="text" id="outagentid-{{i.id}}" class="form-control" name="outagentIdInput" hidden/>  <!-- Search input -->
+                        
+                        <ul id="outagent-list-{{i.id}}" class="agent-dropdownnn">  <!-- List to display results -->
+                            <!-- Results will be inserted here -->
+                        </ul>
+                    </div> 
                 
                 </div>
                 <div class="modal-footer">
@@ -97,52 +103,47 @@
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
+<!-- Frontend JavaScript -->
 
 <script>
-    
-    function populateOutAgentDropdown(searchTerms, dropdown) {
-        $.ajax({
-            url: '/Admin/fetch_outsourceagents/',
-            method: 'GET',
-            data: { searchTerms: searchTerms },
-            success: function(response) {
-                
-                dropdown.empty();
-                // Append new options
-                $.each(response, function(index, outagent) {
-                    dropdown.append('<li data-outagent-id="' + outagent.id + '">' + outagent.name + '</li>');
+    $(document).ready(function() {
+        $("[id^='outagent-search']").on("input", function() {
+            var $input = $(this);
+            var id = $input.attr("id").split("-")[2];
+            var query = $input.val();
+            
+
+            // Check if the query length is at least 4 characters
+            if (query.length >= 3) {
+                $.ajax({
+                    url: "{% url 'outagent_search' %}",
+                    data: { q: query },
+                    success: function(response) {
+                        var results = response.results;
+                        var $list = $("#outagent-list-" + id);
+                        $list.empty();
+
+                        results.forEach(function(outagent) {
+                            var listItem = `<li data-outagent-id="${outagent.id}">${outagent.text}</li>`;
+                            $list.append(listItem);
+                            
+                        });
+                    },
                 });
-                // Show the dropdown
-                dropdown.show();
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching agents:', error);
+            } else {
+                // If the query length is less than 4, clear the list
+                $("#outagent-list-" + id).empty();
             }
         });
-    }
- 
-    $(document).ready(function() {
-        // Event listener for input changes in the search field
-        $(document).on('input', '.outagentSearchInput', function() {
-            var searchTerms = $(this).val();
-            var dropdown = $(this).siblings('.outagent-dropdown');
-            populateOutAgentDropdown(searchTerms, dropdown);
-        });
- 
-        // Event listener for agent selection
-        $(document).on('click', '.outagent-dropdown li', function() {
-            var agentId = $(this).data('outagent-id');
-            var agentName = $(this).text();
-            var inputField = $(this).closest('.search-select-container').find('.outagentSearchInput');
-            var hiddenInput = $(this).closest('.search-select-container').find('.outagentIdInput');
+
+        $("[id^='outagent-list']").on("click", "li", function() {
+            var $li = $(this);
+            var outagentName = $li.text();
+            var outagentId = $li.data("outagent-id");
+            var id = $li.closest(".modal").attr("id").split("-")[1];
             
-            // Set the selected agent ID in the hidden input field
-            hiddenInput.val(agentId);
-            // Set the selected agent name in the visible input field
-            inputField.val(agentName);
-            // Hide the dropdown
-            $(this).closest('.outagent-dropdown').hide();
+            $("#outagent-search-" + id).val(outagentName); // Set input value
+            $("#outagentid-" + id).val(outagentId); 
         });
     });
 </script>
