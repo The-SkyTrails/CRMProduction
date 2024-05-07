@@ -1,4 +1,4 @@
-<style>
+{% comment %} <style>
     .search-select-container {
        position: relative;
    }
@@ -28,7 +28,7 @@
    }
    
  </style>
-
+ {% endcomment %}
 
   <div class="modal fade" id="agentModal-{{i.id}}" tabindex="-1" aria-labelledby="agentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -44,11 +44,16 @@
                 <div class="modal-body">
                     {% if i.lead_status == "New Lead" %}
                         <label for="agentSearchInput" class="custom-form-label">Assigned To Agent</label>
+                       
                         <div class="search-select-container">
-                            <input type="text" class="form-control agentSearchInput" placeholder="Search for agents...">
+                            {% comment %} <input type="text" class="form-control agentSearchInput" placeholder="Search for agents...">
                             <input type="hidden" class="agentIdInput" name="agentIdInput">
-                            <ul class="agent-dropdown"></ul>
-                        </div>
+                            <ul class="agent-dropdown"></ul> {% endcomment %}
+                            <input type="text" id="agent-search-{{i.id}}" placeholder="Type to search for an agent" />  <!-- Search input -->
+                            <ul id="agent-list">  <!-- List to display results -->
+                                <!-- Results will be inserted here -->
+                            </ul>
+                        </div> 
                     {% endif %}
                 </div>
                 <div class="modal-footer">
@@ -99,15 +104,66 @@
 </script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Frontend JavaScript -->
 
+<script>
+        $(document).ready(function() {
+        console.log("soooo")
+            $("#agent-search-{{i.id}}").on("input", function() {  // Trigger on input change
+                var query = $(this).val();  // Get user input
+                console.log(query);
 
+                $.ajax({
+                    url: "{% url 'agent_search' %}",  // AJAX endpoint
+                    data: { q: query },  // Data to send with the request
+                    success: function(response) {  // Success callback
+                        var results = response.results;  // Get results from the server
+                        var $list = $("#agent-list");  // The list to display results
+                        $list.empty();  // Clear previous results
+
+                        // Append new results to the list
+                        results.forEach(function(agent) {
+                            var listItem = `<li>${agent.text}</li>`;
+                            $list.append(listItem);
+                        });
+                    },
+                });
+            });
+        });
+    </script>
+{% comment %} <script>
+    $(document).ready(function() {
+        $("#agent-search").on("input", function() {
+            var query = $(this).val();
+
+            if (query.length >= 4) {  // Trigger AJAX only when there's enough input
+                $.ajax({
+                    url: "{% url 'agent_search' %}",
+                    data: { q: query },
+                    success: function(response) {
+                        var results = response.results;  // This should exist in the response
+                        var $list = $("#agent-list");
+                        $list.empty();  // Clear previous content
+
+                        results.forEach(function(agent) {
+                            var listItem = `<li>${agent.text}</li>`;  // Use the 'text' property
+                            $list.append(listItem);
+                        });
+                    },
+                });
+            }
+        });
+    });
+</script> {% endcomment %}
+
+{% comment %} 
 <script>
     // Function to fetch and populate agent dropdown options based on search input
     function populateAgentDropdown(searchTerm, dropdown) {
         console.log("Fetching agents for search term:", searchTerm);
         // Make an AJAX request to fetch agents based on the search term
         $.ajax({
-            url: '/Admin/fetch_agents/',
+            url: '{% url 'agent_search' %}',
             method: 'GET',
             data: { searchTerm: searchTerm },
             success: function(response) {
@@ -150,4 +206,4 @@
             $(this).closest('.agent-dropdown').hide();
         });
     });
-</script>
+</script> {% endcomment %}
