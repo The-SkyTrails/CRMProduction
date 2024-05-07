@@ -7,7 +7,7 @@
         position: absolute;
         top: 100%;
         left: 0;
-        width: 100%;
+        width: 50%;
         z-index: 1000;
         list-style: none;
         background-color: #fff;
@@ -30,10 +30,9 @@
     }
 </style>
 
-
   <div class="modal fade" id="agentModal-{{i.id}}" tabindex="-1" aria-labelledby="agentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form action="{% url "update_assigned_agent" i.id %}" method="post" autocomplete="off">
+        <form action="{% url "update_assigned_agent" i.id %}" method="post">
             {% csrf_token %}
             <input type="hidden" name="redirect_to" value="{% if request.path == '/ActiveLeads/' %}active_leads{% elif request.path == '/LatestLeads/' %}latest_leads{% elif request.path == '/InprocessLeads/' %}inprocess_leads{% elif request.path == '/AppointmentLeads/' %}appointment_leads{% elif request.path == '/DeliveredLeads/' %}delivered_leads{% elif request.path == '/CompletedLeads/' %}completed_leads{% elif request.path == '/EnrolledLeads/' %}enrolled_leads{% else %}new_leads{% endif %}">
             <div class="modal-content">
@@ -44,19 +43,17 @@
                 <hr>
                 <div class="modal-body">
                     {% if i.lead_status == "New Lead" %}
-                   
                         <label for="agentSearchInput-{{i.id}}" class="custom-form-label">Assigned To Agent</label>
                        
                         <div class="search-select-container">
                             
-                            <input type="text" id="agent-search-{{i.id}}"  placeholder="Type to search for an agent"  class="form-control"/>  <!-- Search input -->
-                            <input type="text" id="agent-id" name="agentIdInput" placeholder="Type to search for an agent"  class="form-control" hidden/>  <!-- Search input -->
-                            <ul id="agent-list-{{i.id}}" class="agent-dropdownnn">  
+                            <input type="text" id="agent-search-{{i.id}}" placeholder="Type to search for an agent" class="form-control"/>  <!-- Search input -->
+                            <input type="text" id="agentid-{{i.id}}" placeholder="Type to search for an agent" class="form-control" class="agentIdInput" hidden/>  <!-- Search input -->
+                            
+                            <ul id="agent-list-{{i.id}}" class="agent-dropdownnn">  <!-- List to display results -->
                                 <!-- Results will be inserted here -->
                             </ul>
                         </div> 
-                  
-                       
                     {% endif %}
                 </div>
                 <div class="modal-footer">
@@ -109,13 +106,13 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <!-- Frontend JavaScript -->
 
-<!-- <script>
+<script>
     $(document).ready(function() {
         $("[id^='agent-search']").on("input", function() {
             var $input = $(this);
             var id = $input.attr("id").split("-")[2];
             var query = $input.val();
-            console.log("querysssssssssssss", query);
+            
 
             // Check if the query length is at least 4 characters
             if (query.length >= 4) {
@@ -128,9 +125,8 @@
                         $list.empty();
 
                         results.forEach(function(agent) {
-                            var listItem = <li data-agent-id="${agent.id}">${agent.text}</li>;
+                            var listItem = `<li data-agent-id="${agent.id}">${agent.text}</li>`;
                             $list.append(listItem);
-                            console.log(listItem,"LLLLLLLLLLLLLLLLLLLLLl")
                         });
                     },
                 });
@@ -143,55 +139,13 @@
         $("[id^='agent-list']").on("click", "li", function() {
             var $li = $(this);
             var agentName = $li.text();
-            var agentId = $li.data("agent-id"); // Get the agent ID from data attribute
+            var agentId = $li.data("agent-id");
+            console.log("ddddd",agentId)
             var id = $li.closest(".modal").attr("id").split("-")[1];
+            console.log("modal id",id)
             $("#agent-search-" + id).val(agentName); // Set input value
-            $("#agent-id").val(agentId); // Set input value
+            $("#agentid-" + id).val(agentId); 
         });
     });
-</script> -->
-
-<script>
-    $(document).ready(function() {
-        $('.modal').on('input', '[id^="agent-search"]', function() {
-            var $input = $(this);
-            var $modal = $input.closest('.modal');
-            var id = $input.attr('id').split('-')[2];
-            var query = $input.val();
-    
-            // Check if the query length is at least 4 characters
-            if (query.length >= 4) {
-                $.ajax({
-                    url: "{% url 'agent_search' %}",
-                    data: { q: query },
-                    success: function(response) {
-                        var results = response.results;
-                        var $list = $modal.find('#agent-list-' + id);
-                        $list.empty();
-    
-                        results.forEach(function(agent) {
-                            var listItem = <li data-agent-id="${agent.id}">${agent.text}</li>;
-                            $list.append(listItem);
-                            
-                        });
-                    },
-                });
-            } else {
-                // If the query length is less than 4, clear the list
-                $modal.find('#agent-list-' + id).empty();
-            }
-        });
-    
-        $('.modal').on('click', '[id^="agent-list"] li', function() {
-            var $li = $(this);
-            var agentName = $li.text();
-            var agentId = $li.data('agent-id');
-            var $modal = $li.closest('.modal');
-            var id = $modal.attr('id').split('-')[1];
-    
-            $modal.find('#agent-search-' + id).val(agentName); // Set input value
-            $modal.find('#agent-id').val(agentId); // Set input value
-        });
-    });
-    
 </script>
+
