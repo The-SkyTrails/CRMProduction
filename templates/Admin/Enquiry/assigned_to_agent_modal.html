@@ -32,7 +32,7 @@
 
   <div class="modal fade" id="agentModal-{{i.id}}" tabindex="-1" aria-labelledby="agentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form action="{% url "update_assigned_agent" i.id %}" method="post">
+        <form action="{% url "update_assigned_agent" i.id %}" method="post" autocomplete="off">
             {% csrf_token %}
             <input type="hidden" name="redirect_to" value="{% if request.path == '/ActiveLeads/' %}active_leads{% elif request.path == '/LatestLeads/' %}latest_leads{% elif request.path == '/InprocessLeads/' %}inprocess_leads{% elif request.path == '/AppointmentLeads/' %}appointment_leads{% elif request.path == '/DeliveredLeads/' %}delivered_leads{% elif request.path == '/CompletedLeads/' %}completed_leads{% elif request.path == '/EnrolledLeads/' %}enrolled_leads{% else %}new_leads{% endif %}">
             <div class="modal-content">
@@ -66,8 +66,7 @@
 </div>
 
 
-
-   <script>
+<script>
     // Function to set the value of redirect_to based on the current URL
     function setRedirectTo(currentPath, modalId) {
         var redirectInput = document.querySelector('#' + modalId + ' input[name="redirect_to"]');
