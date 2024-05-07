@@ -284,22 +284,22 @@ class EnquiryForm1(forms.ModelForm):
 
         widgets = {
             "email": forms.EmailInput(
-                attrs={"class": "form-control", "placeholder": "Enter Email Id"}
+                attrs={"class": "form-control", "placeholder": "Enter Email Id",'required': 'required'}
             ),
             "contact": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Enter Contact No"}
+                attrs={"class": "form-control", "placeholder": "Enter Contact No",'required': 'required'}
             ),
             "FirstName": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Enter First Name"}
+                attrs={"class": "form-control", "placeholder": "Enter First Name",'required': 'required'}
             ),
             "LastName": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Enter Last Name"}
+                attrs={"class": "form-control", "placeholder": "Enter Last Name",'required': 'required'}
             ),
-            "Dob": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "Gender": forms.Select(attrs={"class": "form-select"}),
-            "Country": forms.Select(attrs={"class": "form-select"}),
+            "Dob": forms.DateInput(attrs={"class": "form-control", "type": "date",'required': 'required'}),
+            "Gender": forms.Select(attrs={"class": "form-select",'required': 'required'}),
+            "Country": forms.Select(attrs={"class": "form-select",'required': 'required'}),
             "passport_no": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Enter Passport Number"}
+                attrs={"class": "form-control", "placeholder": "Enter Passport Number",'required': 'required'}
             ),
             "assign_to_agent": forms.Select(attrs={"class": "form-select"}),
             # "assign_to_agent": ModelSelect2Widget(model=Agent, search_fields=['name__icontains'], attrs={"class": "form-select"}),
