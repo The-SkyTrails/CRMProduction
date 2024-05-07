@@ -43,14 +43,12 @@
                 <hr>
                 <div class="modal-body">
                     {% if i.lead_status == "New Lead" %}
-                        <label for="agentSearchInput" class="custom-form-label">Assigned To Agent</label>
+                        <label for="agentSearchInput-{{i.id}}" class="custom-form-label">Assigned To Agent</label>
                        
                         <div class="search-select-container">
-                            {% comment %} <input type="text" class="form-control agentSearchInput" placeholder="Search for agents...">
-                            <input type="hidden" class="agentIdInput" name="agentIdInput">
-                            <ul class="agent-dropdown"></ul> {% endcomment %}
+                            
                             <input type="text" id="agent-search-{{i.id}}" placeholder="Type to search for an agent" />  <!-- Search input -->
-                            <ul id="agent-list">  <!-- List to display results -->
+                            <ul id="agent-list-{{i.id}}">  <!-- List to display results -->
                                 <!-- Results will be inserted here -->
                             </ul>
                         </div> 
@@ -107,8 +105,113 @@
 <!-- Frontend JavaScript -->
 
 <script>
+    $(document).ready(function() {
+        $("[id^='agent-search']").on("input", function() {
+            var $input = $(this);
+            var id = $input.attr("id").split("-")[2];
+            var query = $input.val();
+            console.log("querysssssssssssss", query);
+
+            // Check if the query length is at least 4 characters
+            if (query.length >= 4) {
+                $.ajax({
+                    url: "{% url 'agent_search' %}",
+                    data: { q: query },
+                    success: function(response) {
+                        var results = response.results;
+                        var $list = $("#agent-list-" + id);
+                        $list.empty();
+
+                        results.forEach(function(agent) {
+                            var listItem = `<li data-agent-id="${agent.id}">${agent.text}</li>`;
+                            $list.append(listItem);
+                        });
+                    },
+                });
+            } else {
+                // If the query length is less than 4, clear the list
+                $("#agent-list-" + id).empty();
+            }
+        });
+
+        $("[id^='agent-list']").on("click", "li", function() {
+            var $li = $(this);
+            var agentName = $li.text();
+            var id = $li.closest(".modal").attr("id").split("-")[1];
+            $("#agent-search-" + id).val(agentName); // Set input value
+        });
+    });
+</script>
+
+{% comment %} 
+<script>
+    $(document).ready(function() {
+        $("[id^='agent-search']").on("input", function() {
+            var $input = $(this);
+            var id = $input.attr("id").split("-")[2];
+            var query = $input.val();
+            console.log("querysssssssssssss", query);
+
+            $.ajax({
+                url: "{% url 'agent_search' %}",
+                data: { q: query },
+                success: function(response) {
+                    var results = response.results;
+                    var $list = $("#agent-list-" + id);
+                    $list.empty();
+
+                    results.forEach(function(agent) {
+                        var listItem = `<li data-agent-id="${agent.id}">${agent.text}</li>`;
+                        $list.append(listItem);
+                    });
+                },
+            });
+        });
+
+        $("[id^='agent-list']").on("click", "li", function() {
+            var $li = $(this);
+            var agentName = $li.text();
+            var id = $li.closest(".modal").attr("id").split("-")[1];
+            $("#agent-search-" + id).val(agentName); // Set input value
+        });
+    });
+</script> {% endcomment %}
+
+{% comment %} 
+<script>
+    $(document).ready(function() {
+    
+        
+        $("#agent-search").on("input", function() {
+            var query = $(this).val();
+            console.log("querysssssssssssss",query)
+
+            $.ajax({
+                url: "{% url 'agent_search' %}",
+                data: { q: query },
+                success: function(response) {
+                    var results = response.results;
+                    var $list = $("#agent-list");
+                    $list.empty();
+
+                    results.forEach(function(agent) {
+                        var listItem = `<li data-agent-id="${agent.id}">${agent.text}</li>`;
+                        $list.append(listItem);
+                    });
+                },
+            });
+        });
+
+        $("#agent-list").on("click", "li", function() {
+            var agentName = $(this).text();
+            $("#agent-search-{{i.id}}").val(agentName); // Set input value
+        });
+    });
+</script> {% endcomment %}
+
+{% comment %} <script>
         $(document).ready(function() {
-        console.log("soooo")
+        
             $("#agent-search-{{i.id}}").on("input", function() {  // Trigger on input change
                 var query = $(this).val();  // Get user input
                 console.log(query);
@@ -130,7 +233,9 @@
                 });
             });
         });
-    </script>
+</script> {% endcomment %}
+
+
 {% comment %} <script>
     $(document).ready(function() {
         $("#agent-search").on("input", function() {
