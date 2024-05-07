@@ -2541,7 +2541,7 @@ def admin_new_leads_details(request):
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
     
     enquiry_list = Enquiry.objects.all().order_by("-id")
-    paginator = Paginator(enquiry_list, 10)
+    paginator = Paginator(enquiry_list, 5)
     page_number = request.GET.get('page')
     
 
@@ -2937,7 +2937,7 @@ def enrolled_Application(request):
     enquiry = Enquiry.objects.filter(lead_status="Enrolled").order_by("-id")
 
     enquiry_list = Enquiry.objects.filter(lead_status="Enrolled").order_by("-id")
-    paginator = Paginator(enquiry_list, 10)
+    paginator = Paginator(enquiry_list, 5)
     page_number = request.GET.get('page')
     
     try:
@@ -4475,7 +4475,7 @@ def admin_active_leads_details(request):
     enquiry_list = Enquiry.objects.filter(
         Q(lead_status="Active") | Q(lead_status="PreEnrolled")
     ).order_by("-id")
-    paginator = Paginator(enquiry_list, 10)
+    paginator = Paginator(enquiry_list, 5)
     page_number = request.GET.get('page')
     
     try:
@@ -4513,7 +4513,7 @@ def admin_latest_leads_details(request):
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
     enquiry_list = Enquiry.objects.filter(lead_status="New Lead").order_by("-id")
     
-    paginator = Paginator(enquiry_list, 10)
+    paginator = Paginator(enquiry_list, 5)
     page_number = request.GET.get('page')
     
     try:
@@ -4553,7 +4553,7 @@ def admin_inprocess_leads_details(request):
         Q(lead_status="Inprocess") | Q(lead_status="Ready To Submit")
     ).order_by("-id")
     
-    paginator = Paginator(enquiry_list, 10)
+    paginator = Paginator(enquiry_list, 5)
     page_number = request.GET.get('page')
     
     try:
@@ -4593,7 +4593,7 @@ def admin_appointment_leads_details(request):
         Q(lead_status="Appointment") | Q(lead_status="Ready To Collection")
     ).order_by("-id")
 
-    paginator = Paginator(enquiry_list, 10)
+    paginator = Paginator(enquiry_list, 5)
     page_number = request.GET.get('page')
     
     try:
@@ -4631,7 +4631,7 @@ def admin_deleivered_leads_details(request):
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
     enquiry_list = Enquiry.objects.filter(lead_status="Result").order_by("-id")
     
-    paginator = Paginator(enquiry_list, 10)
+    paginator = Paginator(enquiry_list, 5)
     page_number = request.GET.get('page')
     
     try:
@@ -4669,7 +4669,7 @@ def admin_completed_leads_details(request):
     lead = [status for status in leads_status if status[0] not in excluded_statuses]
     enquiry_list = Enquiry.objects.filter(lead_status="Delivery").order_by("-id")
     
-    paginator = Paginator(enquiry_list, 10)
+    paginator = Paginator(enquiry_list, 5)
     page_number = request.GET.get('page')
     
     try:
