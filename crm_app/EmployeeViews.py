@@ -5484,14 +5484,14 @@ def update_assigned_employee(request, id):
     if request.method == "POST":
         ######### ASSIGN CODE #########
         try:
-            assign_to_employee = request.POST.get("assign_to_employee")
+            assign_to_employee = request.POST.get("employeeIdInput")
             emp = Employee.objects.get(id=assign_to_employee)
             enquiry.assign_to_employee = emp
             employee_id = emp.id
             create_notification(emp, "New Lead Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen=False, employee=assign_to_employee
+                is_seen__in=[False], employee=assign_to_employee
             ).count()
             assign_notification(employee_id, "New Lead Assign Added", current_count)
 
@@ -5631,6 +5631,29 @@ def emp_search_view(request):
             "text": f"{agent.users.first_name} {agent.users.last_name} - {agent.type}",  # How results appear in the dropdown
         }
         for agent in agents
+    ]
+
+    return JsonResponse({"results": results})
+
+
+
+def employee_search_view(request):
+    
+    query = request.GET.get("q", "")  # The search query from the dropdown
+    # Fetch a limited number of agents that match the query
+    employees = Employee.objects.filter(
+        Q(users__first_name__icontains=query) |  # Match on first name
+        Q(users__last_name__icontains=query)    # Match on last name
+              # Match on agent type
+    )[:10]  # Limit results to avoid too many results at once
+
+    # Format the response for Select2
+    results = [
+        {
+            "id": employee.id,
+            "text": f"{employee.users.first_name} {employee.users.last_name} - {employee.department}",  # How results appear in the dropdown
+        }
+        for employee in employees
     ]
 
     return JsonResponse({"results": results})

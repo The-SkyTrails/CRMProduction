@@ -1,117 +1,116 @@
-<div class="modal fade" id="exampleModal-{{i.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<style>
+    .search-select-container {
+        position: relative;
+    }
+
+    .agent-dropdownnn {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 50%;
+        z-index: 1000;
+        list-style: none;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-top: none;
+        padding: 0;
+        margin-top: 0;
+        
+        max-height: 200px; /* Optional: Set max height for dropdown */
+        overflow-y: auto; /* Optional: Add vertical scrollbar */
+    }
+
+    .agent-dropdownnn li {
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .agent-dropdown li:hover {
+        background-color: #f0f0f0;
+    }
+</style>
+
+  <div class="modal fade" id="employeeeModal-{{i.id}}" tabindex="-1" aria-labelledby="employeeeModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form action="{% url "emp_update_assign_employee" i.id %}" method="post">
+        <form action="{% url "emp_update_assign_employee" i.id %}" method="post" autocomplete="off">
             {% csrf_token %}
-            <input type="hidden" name="redirect_to" value="{% if request.path == '/ActiveLead/List/' %}active_leads{% elif request.path == '/LatestLead/List/' %}latest_leads{% elif request.path == '/InProcessLead/List/' %}inprocess_leads{% elif request.path == '/AppointmentLead/List/' %}appointment_leads{% elif request.path == '/ResultLead/List/' %}delivered_leads{% elif request.path == '/DeliveryLead/List/' %}completed_leads{% elif request.path == '/EnrolledLead/List/' %}enrolled_leads{% else %}new_leads{% endif %}">
+            
             <div class="modal-content">
                 <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Assigned To Employee</h1>
+                <h1 class="modal-title fs-5" id="employeeeModalLabel">Assigned To Employee</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <hr>
                 <div class="modal-body">
-
-                    {% if i.lead_status == "New Lead" %}
-                <label class="custom-form-label" for="">Assigned To Presales Employee</label>
-                <select class="form-select" name="assign_to_employee" id="assign_to_employee">
-                    <option value="0">Select</option>
                     
-                    {% for employee in presales_employees %}
-                    
-                        <option value="{{ employee.id }}" {% if enquiry.assign_to_employee_id == employee.id %}selected{% endif %}>{{ employee.users }}</option>
-                    {% endfor %}
-                </select>
-                {% endif %}
-                    
-                    {% if i.lead_status == "Active" %}
-                <label class="custom-form-label" for="">Assigned To Assesment Employee</label>
-                <select class="form-select" name="assign_to_assesment_employee" id="assign_to_assesment_employee">
-                    <option value="0">Select</option>
-                    
-                    {% for employee in assesment_employee %}
-                    
-                        <option value="{{ employee.id }}" {% if enquiry.assign_to_assesment_employee_id == employee.id %}selected{% endif %}>{{ employee.users }}</option>
-                    {% endfor %}
-                </select>
-                {% endif %}
-                {% if i.lead_status == "PreEnrolled" %}
-                <label class="custom-form-label" for="">Assigned To Sales Employee</label>
-                <select class="form-select" name="assign_to_sales_employee" id="assign_to_sales_employee">
-                    <option value="0">Select</option>
-                    
-                    {% for employee in sales_employees %}
-                    
-                        <option value="{{ employee.id }}" {% if enquiry.assign_to_sales_employee_id == employee.id %}selected{% endif %}>{{ employee.users }}</option>
-                    {% endfor %}
-                </select>
-                {% endif %}
-                {% if i.lead_status == "Enrolled" %}
-                <label class="custom-form-label" for="">Assigned To Documentation Employee</label>
-                <select class="form-select" name="assign_to_documentation_employee" id="assign_to_documentation_employee">
-                    <option value="0">Select</option>
-                    
-                    {% for employee in documentation_employees %}
-                    
-                        <option value="{{ employee.id }}" {% if enquiry.assign_to_documentation_employee_id == employee.id %}selected{% endif %}>{{ employee.users }}</option>
-                    {% endfor %}
-                </select>
-            
-                {% endif %}
-                {% if i.lead_status == "Inprocess"  %}
-                <label class="custom-form-label" for="">Assigned To VisaTeam Employee</label>
-                <select class="form-select" name="assign_to_visa_team_employee" id="assign_to_visa_team_employee">
-                    <option value="0">Select</option>
-                    
-                    {% for employee in visa_team %}
-                    
-                        <option value="{{ employee.id }}" {% if enquiry.assign_to_visa_team_employee_id == employee.id %}selected{% endif %}>{{ employee.users }}</option>
-                    {% endfor %}
-                </select>
-                {% endif %}
+                   
+                        <label for="EmployeeSearchInput-{{i.id}}" class="custom-form-label">Assigned To Employee</label>
+                       
+                        <div class="search-select-container">
+                            
+                            <input type="text" id="employee-search-{{i.id}}" placeholder="Type to search for an Employee" class="form-control"/>  <!-- Search input -->
+                            <input type="text" id="employeeid-{{i.id}}" placeholder="Type to search for an Employee" class="form-control" name="employeeIdInput" hidden/>  <!-- Search input -->
+                            
+                            <ul id="employee-list-{{i.id}}" class="agent-dropdownnn">  <!-- List to display results -->
+                                <!-- Results will be inserted here -->
+                            </ul>
+                        </div> 
+                  
                 </div>
                 <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </div>
         </form>
     </div>
-  </div>
+</div>
 
 
-  <!-- JavaScript code -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Frontend JavaScript -->
+
 <script>
-    // Function to set the value of redirect_to based on the current URL
-    function setRedirectTo(currentPath, modalId) {
-        var redirectInput = document.querySelector('#' + modalId + ' input[name="redirect_to"]');
-        if (currentPath.includes("/ActiveLead/List/")) {
-            redirectInput.value = "active_leads";
-        } else if (currentPath.includes("/LatestLead/List/")) {
-            redirectInput.value = "latest_leads";
-        } else if (currentPath.includes("/InProcessLead/List/")) {
-            redirectInput.value = "inprocess_leads";
-        } else if (currentPath.includes("/AppointmentLead/List/")) {
-            redirectInput.value = "appointment_leads";
-        } else if (currentPath.includes("/ResultLead/List/")) {
-            redirectInput.value = "delivered_leads";
-        } else if (currentPath.includes("/DeliveryLead/List/")) {
-            redirectInput.value = "completed_leads";
-        } else if (currentPath.includes("/EnrolledLead/List/")) {
-            redirectInput.value = "enrolled_leads";
-        } else {
-            redirectInput.value = "new_leads";
-        }
-    }
+    $(document).ready(function() {
+        $("[id^='employee-search']").on("input", function() {
+            var $input = $(this);
+            var id = $input.attr("id").split("-")[2];
+            var query = $input.val();
+            
 
-    // Call the setRedirectTo function when each modal is shown
-    document.addEventListener("DOMContentLoaded", function () {
-        var modals = document.querySelectorAll('.modal');
-        modals.forEach(function(modal) {
-            modal.addEventListener('shown.bs.modal', function () {
-                var currentPath = window.location.pathname;
-                var modalId = modal.getAttribute('id');
-                setRedirectTo(currentPath, modalId);
-            });
+            // Check if the query length is at least 4 characters
+            if (query.length >= 3) {
+                $.ajax({
+                    url: "{% url 'employee_search' %}",
+                    data: { q: query },
+                    success: function(response) {
+                        var results = response.results;
+                        var $list = $("#employee-list-" + id);
+                        $list.empty();
+
+                        results.forEach(function(employee) {
+                            var listItem = `<li data-employee-id="${employee.id}">${employee.text}</li>`;
+                            $list.append(listItem);
+                            console.log(listItem,"LLLLLLLLLLLLLLLLLLLLLl")
+                        });
+                    },
+                });
+            } else {
+                // If the query length is less than 4, clear the list
+                $("#employee-list-" + id).empty();
+            }
+        });
+
+        $("[id^='employee-list']").on("click", "li", function() {
+            var $li = $(this);
+            var employeeName = $li.text();
+            var employeeId = $li.data("employee-id");
+            
+            var id = $li.closest(".modal").attr("id").split("-")[1];
+            
+            $("#employee-search-" + id).val(employeeName); // Set input value
+            $("#employeeid-" + id).val(employeeId); 
         });
     });
 </script>
+
