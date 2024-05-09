@@ -304,7 +304,7 @@ class Agent(models.Model):
         upload_to="Agent/Profile Pic/", null=True, blank=True
     )
     assign_employee = models.ForeignKey(
-        Employee, on_delete=models.CASCADE, null=True, blank=True
+        Employee, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     organization_name = models.CharField(max_length=100, null=True, blank=True)
@@ -360,7 +360,7 @@ class OutSourcingAgent(models.Model):
         upload_to="OutSourcing/Agent/Profile Pic/", null=True, blank=True
     )
     assign_employee = models.ForeignKey(
-        Employee, on_delete=models.CASCADE, null=True, blank=True
+        Employee, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     organization_name = models.CharField(max_length=100, null=True, blank=True)
@@ -652,14 +652,14 @@ class Enquiry(models.Model):
     )
     Visa_category = models.ForeignKey(
         VisaCategory,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="enquiry_category",
         null=True,
         blank=True,
     )
     Visa_subcategory = models.ForeignKey(
         VisaCategory,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="enquiry_subcategory",
         null=True,
         blank=True,
@@ -669,7 +669,7 @@ class Enquiry(models.Model):
         max_length=50, choices=VISATYPE_CHOICES, null=True, blank=True
     )
     Package = models.ForeignKey(
-        Package, on_delete=models.CASCADE, null=True, blank=True
+        Package, on_delete=models.SET_NULL, null=True, blank=True
     )
     Source = models.CharField(max_length=100, choices=source, null=True, blank=True)
     Reference = models.CharField(max_length=100, null=True, blank=True)
@@ -887,7 +887,7 @@ class Enquiry(models.Model):
 class Notes(models.Model):
 
     enquiry = models.ForeignKey(
-        Enquiry, on_delete=models.SET_NULL, null=True, blank=True
+        Enquiry, on_delete=models.CASCADE, null=True, blank=True
     )
     notes = models.CharField(max_length=255)
     file = models.FileField(upload_to="Enquiry/Notes/", null=True, blank=True)
@@ -918,10 +918,10 @@ class FrontWebsiteEnquiry(models.Model):
         blank=True,
     )
     country_name = models.ForeignKey(
-        VisaCountry, on_delete=models.CASCADE, null=True, blank=True
+        VisaCountry, on_delete=models.SET_NULL, null=True, blank=True
     )
     category_name = models.ForeignKey(
-        VisaCategory, on_delete=models.CASCADE, null=True, blank=True
+        VisaCategory, on_delete=models.SET_NULL, null=True, blank=True
     )
     message = models.TextField(null=True, blank=True)
     image = models.FileField(upload_to="frontwebsiteenquiry/", null=True, blank=True)
@@ -937,7 +937,7 @@ class FrontWebsiteEnquiry(models.Model):
 class DocumentFiles(models.Model):
 
     enquiry_id = models.ForeignKey(
-        Enquiry, on_delete=models.SET_NULL, null=True, blank=True
+        Enquiry, on_delete=models.CASCADE, null=True, blank=True
     )
     document_id = models.ForeignKey(
         Document, on_delete=models.CASCADE, null=True, blank=True
@@ -947,7 +947,7 @@ class DocumentFiles(models.Model):
     )
     last_updated_on = models.DateTimeField(auto_now=True, null=True, blank=True)
     lastupdated_by = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, null=True, blank=True
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     def __str__(self):
@@ -1028,7 +1028,7 @@ class EnqAppointment(models.Model):
     ]
 
     enquiry = models.ForeignKey(
-        Enquiry, on_delete=models.SET_NULL, null=True, blank=True
+        Enquiry, on_delete=models.CASCADE, null=True, blank=True
     )
     description = models.TextField()
     date = models.DateField()
@@ -1105,7 +1105,7 @@ class ChatMessage(models.Model):
 
     group = models.ForeignKey(ChatGroup, on_delete=models.CASCADE)
     message_by = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, null=True, blank=True
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True
     )
     message_content = models.CharField(max_length=1000)
     filename = models.CharField(max_length=100, null=True, blank=True)
