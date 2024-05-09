@@ -123,11 +123,11 @@
                         <th>Package Name</th>
                         <th>CREATED BY</th>
 
-                        {% if user.user_type == "4" %}
+                        {% comment %} {% if user.user_type == "4" %}
                         <th>Assigned TO</th>
                         {% elif user.user_type == "5" %}
                         <th>Update Status</th>
-                        {% endif %}
+                        {% endif %} {% endcomment %}
                         <th>LEAD status</th>
                         <th>Notes</th>
                         <th>Appointment</th>
@@ -166,7 +166,7 @@
                         <td>{{i.Package}}</td>
                         <td>{{i.created_by}}</td>
                         
-                        {% if user.user_type == "4" %}
+                        {% comment %} {% if user.user_type == "4" %}
                         <td>
                             {% if i.assign_to_employee %}
                             <b>{{i.assign_to_employee.users.first_name }} {{i.assign_to_employee.users.last_name}}</b>
@@ -224,7 +224,7 @@
                             </button>
                             {% include "Agent/Enquiry/lead_status_update_modal.html" %}
                         </td>
-                        {% endif %}
+                        {% endif %} {% endcomment %}
                         <td>
                             <span class="badge rounded-pill1">{{i.lead_status}}</span>
                         </td>
