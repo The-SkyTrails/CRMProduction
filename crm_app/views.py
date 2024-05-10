@@ -100,7 +100,7 @@ def agent_signup(request):
                     )
                 except:
                     pass
-
+        
                 send_congratulatory_email(
                     firstname, lastname, email, password, user_type
                 )

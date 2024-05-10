@@ -89,7 +89,7 @@ def product_add_mes(title , country , contact):
                             ]
                         }
                     },
-                    "templateName": "product_v2"
+                    "templateName": "product_v3"
                 },
                 "from": "+918800517859",
                 "to": "+91" + contact

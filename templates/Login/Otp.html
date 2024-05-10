@@ -16,7 +16,7 @@
 }
 </style>
 
-<form action="" method="POST">
+<form id="otpForm" action="" method="POST">
   {% csrf_token %}
 
 <div class="optcontainer">
@@ -61,7 +61,7 @@
 
 
       <div class="d-grid col-12">
-        <button class="btn btn-color" type="submit">Verify</button>
+        <button  id="verifyButton" class="btn btn-color" type="submit">Verify</button>
       </div>
 
 
@@ -113,6 +113,9 @@
 
   
   window.onload = startCountdown;
+  document.getElementById("otpForm").addEventListener("submit", function () {
+    document.getElementById("verifyButton").disabled = true;
+  });
 </script>
 
 

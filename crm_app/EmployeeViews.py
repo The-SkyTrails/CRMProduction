@@ -1287,12 +1287,14 @@ class emp_all_agent(ListView):
     context_object_name = "agent"
     paginate_by = 10
 
-
     def get_queryset(self):
-        user = self.request.user.employee
-        return Agent.objects.filter(
-            Q(registerdby=self.request.user) | Q(assign_employee=user)
-        ).order_by("-id")
+        return Agent.objects.all().order_by("-id")
+
+    # def get_queryset(self):
+    #     user = self.request.user.employee
+    #     return Agent.objects.filter(
+    #         Q(registerdby=self.request.user) | Q(assign_employee=user)
+    #     ).order_by("-id")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

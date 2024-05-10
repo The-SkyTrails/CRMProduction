@@ -43,8 +43,6 @@ Department_Choices = [
     ("Documentation", "Documentation"),
     ("Visa Team", "Visa Team"),
     ("HR", "HR"),
-    ("Developement Team", "Developement Team"),
-    ("Design Team", "Design Team"),
     ("Account Team", "Account Team"),
 ]
 
