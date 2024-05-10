@@ -4300,6 +4300,7 @@ def search_enquiries(request):
 
     if request.method == "POST":
         enquiry_id = request.POST.get("enquiry_id")
+        print("enquiry id",enquiry_id)
         name = request.POST.get("name")
         dob = request.POST.get("date_of_birth")
         passport_no = request.POST.get("passport_no")
@@ -4359,7 +4360,7 @@ def search_enquiries(request):
         if filter_conditions:
             enquiry = enquiry.filter(filter_conditions)
 
-    return render(request, "Admin/Enquiry/lead-details.html", {"enquiry": enquiry})
+    return render(request, "Admin/Enquiry/lead-details.html", {"page": enquiry})
 
 
 @login_required
@@ -4407,7 +4408,7 @@ def search_employee(request):
             employee = employee.filter(filter_conditions)
 
     return render(
-        request, "Admin/Employee Management/Employeelist.html", {"employee": employee}
+        request, "Admin/Employee Management/Employeelist.html", {"page": employee}
     )
 
 
