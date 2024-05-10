@@ -4322,10 +4322,11 @@ def search_enquiries(request):
             last_name_condition = Q()
 
             for n in names:
-                first_name_condition |= Q(FirstName__icontains=n)
+                first_name_condition |= Q(FirstName__icontains=n) 
                 last_name_condition |= Q(LastName__icontains=n)
 
-            filter_conditions &= first_name_condition & last_name_condition
+            # filter_conditions &= first_name_condition & last_name_condition
+            filter_conditions = first_name_condition |last_name_condition
 
         if dob:
             filter_conditions &= Q(Dob=dob)
