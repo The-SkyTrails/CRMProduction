@@ -1743,9 +1743,8 @@ class PackageCreateView(LoginRequiredMixin, CreateView):
             messages.success(self.request, "Package Added Successfully.")
             return super().form_valid(form)
         except:
-            pass
-            # messages.error(self.request, f"Error: {e}")
-            # return self.form_invalid(form)
+            messages.error(self.request, f"Error: {e}")
+            return self.form_invalid(form)
 
     def send_whatsapp_messages(self):
         user_types = ["2", "3", "4", "5", "6"]
