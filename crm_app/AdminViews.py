@@ -1742,7 +1742,7 @@ class PackageCreateView(LoginRequiredMixin, CreateView):
 
             messages.success(self.request, "Package Added Successfully.")
             return super().form_valid(form)
-        except:
+        except Exception as e:
             messages.error(self.request, f"Error: {e}")
             return self.form_invalid(form)
 
