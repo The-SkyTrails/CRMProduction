@@ -3199,6 +3199,12 @@ def add_employee(request):
         tata_tele_agent_no = request.POST.get("tata_tele_agent_no")
         files = request.FILES.get("file")
 
+        if CustomUser.objects.filter(email=email).exists():
+           
+            messages.warning(request, "Email Id already exists")
+            return redirect('emp_emp_personal_details')
+        
+
         if not branch_id:
             messages.warning(request, "Branch ID is required")
             return redirect("emp_emp_personal_details")
