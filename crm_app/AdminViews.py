@@ -1737,7 +1737,7 @@ class PackageCreateView(LoginRequiredMixin, CreateView):
             form.instance.last_updated_by = self.request.user
             form.instance.approval = "Yes"
             self.object = form.save()
-            # self.send_whatsapp_messages()
+            self.send_whatsapp_messages()
             # self.send_email()
 
             messages.success(self.request, "Package Added Successfully.")
@@ -1763,7 +1763,7 @@ class PackageCreateView(LoginRequiredMixin, CreateView):
                         product_add_mes(title, country, contact)
                     except:
                         pass
-
+       
     def send_email(self):
         title = self.object.title if self.object else None
         country = (
