@@ -199,12 +199,13 @@ class PackageForm(forms.ModelForm):
             "assign_to_group",
             "image",
             "processing_time",
+            "product_pdf",
         ]
         widgets = {
             "visa_country": forms.Select(attrs={"class": "form-select"}),
             "visa_category": forms.Select(attrs={"class": "form-select"}),
             "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Enter Title Name"}
+                attrs={"class": "form-control", "placeholder": "Enter Title Name",'required': 'required'}
             ),
             "description": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Enter Description"}
@@ -233,6 +234,7 @@ class PackageForm(forms.ModelForm):
             ),
             "assign_to_group": forms.Select(attrs={"class": "form-select"}),
             "image": forms.FileInput(attrs={"class": "form-control"}),
+            "product_pdf": forms.FileInput(attrs={"class": "form-control"}),
             "processing_time": forms.Select(attrs={"class": "form-select"}),
         }
 

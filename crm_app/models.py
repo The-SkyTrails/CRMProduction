@@ -506,7 +506,7 @@ class Package(models.Model):
         blank=True,
         related_name="package_category",
     )
-    title = models.CharField(max_length=100, null=True, blank=True)
+    title = models.CharField(max_length=100)
     description = models.CharField(max_length=500, null=True, blank=True)
     assign_to_group = models.ForeignKey(
         Group, on_delete=models.SET_NULL, null=True, blank=True
@@ -520,7 +520,8 @@ class Package(models.Model):
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True
     )
     last_updated_on = models.DateTimeField(auto_now=True)
-    image = models.FileField(upload_to="package_images/", null=True, blank=True)
+    image = models.ImageField(upload_to="package_images/", null=True, blank=True)
+    product_pdf = models.FileField(upload_to="product/pdf/", null=True, blank=True)
     processing_time = models.CharField(
         max_length=30, choices=PROCESSING_TIME_CHOICES, blank=True, null=True
     )
