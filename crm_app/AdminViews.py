@@ -1737,8 +1737,8 @@ class PackageCreateView(LoginRequiredMixin, CreateView):
             form.instance.last_updated_by = self.request.user
             form.instance.approval = "Yes"
             self.object = form.save()
-            self.send_whatsapp_messages()
-            self.send_email()
+            # self.send_whatsapp_messages()
+            # self.send_email()
 
             messages.success(self.request, "Package Added Successfully.")
             return super().form_valid(form)
