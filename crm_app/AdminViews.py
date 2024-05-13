@@ -4730,7 +4730,7 @@ def agent_search_view(request):
         Q(users__first_name__icontains=query) |  # Match on first name
         Q(users__last_name__icontains=query)    # Match on last name
               # Match on agent type
-    )[:10]  # Limit results to avoid too many results at once
+    )  # Limit results to avoid too many results at once
 
     # Format the response for Select2
     results = [
