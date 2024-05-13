@@ -882,12 +882,12 @@ def editproduct_details(request, id):
         visatype = request.POST.get("visatype")
         visacountry_id = request.POST.get("visacountry_id")
         visacategory_id = request.POST.get("visacategory_id")
-        visasubcategory_id = request.POST.get("visasubcategory")
+        
         product_id = request.POST.get("Package")
 
         visa_country = VisaCountry.objects.get(id=visacountry_id)
         visa_category = VisaCategory.objects.get(id=visacategory_id)
-        visa_subcategory = VisaCategory.objects.get(id=visacategory_id)
+        
         package = Package.objects.get(id=product_id)
 
         enquiry.Source = source
@@ -895,7 +895,7 @@ def editproduct_details(request, id):
         enquiry.Visa_type = visatype
         enquiry.Visa_country = visa_country
         enquiry.Visa_category = visa_category
-        enquiry.Visa_subcategory = visa_subcategory
+        
         enquiry.Package = package
 
         enquiry.save()
