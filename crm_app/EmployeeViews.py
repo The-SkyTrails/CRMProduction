@@ -923,7 +923,7 @@ def active_save(request, id):
         )
 
         current_count = Notification.objects.filter(
-            is_seen=False, employee=enquiry.assign_to_assesment_employee
+            is_seen__in=[False], employee=enquiry.assign_to_assesment_employee
         ).count()
 
         employee_id = enquiry.assign_to_assesment_employee.id
@@ -955,7 +955,7 @@ def enrolled_save(request, id):
         )
 
         current_count = Notification.objects.filter(
-            is_seen=False, employee=enquiry.assign_to_documentation_employee
+            is_seen__in=[False], employee=enquiry.assign_to_documentation_employee
         ).count()
 
         employee_id = enquiry.assign_to_documentation_employee.id
@@ -989,7 +989,7 @@ def enprocess_save(request, id):
         )
 
         current_count = Notification.objects.filter(
-            is_seen=False, employee=enquiry.assign_to_visa_team_employee
+            is_seen__in=[False], employee=enquiry.assign_to_visa_team_employee
         ).count()
 
         employee_id = enquiry.assign_to_visa_team_employee.id
@@ -1203,7 +1203,7 @@ def emp_add_agent(request):
                 msg = f"New OutSourceAgent Added({fullname})"
                 create_admin_notification(msg)
 
-                current_count = Notification.objects.filter(is_seen=False).count()
+                current_count = Notification.objects.filter(is_seen__in=[False]).count()
                 send_notification_admin(msg, current_count)
                 # send_notification_admin("New Lead Assign Added", current_count)
 
@@ -1254,7 +1254,7 @@ def emp_add_agent(request):
                 msg = f"New Agent Added({fullname})"
                 create_admin_notification(msg)
 
-                current_count = Notification.objects.filter(is_seen=False).count()
+                current_count = Notification.objects.filter(is_seen__in=[False]).count()
                 send_notification_admin(msg, current_count)
 
                 context = {"employees": relevant_employees, "dep": dep}
@@ -3249,7 +3249,7 @@ def add_employee(request):
             msg = f"New Employee Added({firstname} {lastname} ({user.employee.department}))"
             create_admin_notification(msg)
 
-            current_count = Notification.objects.filter(is_seen=False).count()
+            current_count = Notification.objects.filter(is_seen__in=[False]).count()
             send_notification_admin(msg, current_count)
 
             send_congratulatory_email(
@@ -4235,7 +4235,7 @@ def lead_emp_add_agent(request):
                 msg = f"New OutSourceAgent Added({fullname})"
                 create_admin_notification(msg)
 
-                current_count = Notification.objects.filter(is_seen=False).count()
+                current_count = Notification.objects.filter(is_seen__in=[False]).count()
                 send_notification_admin(msg, current_count)
                 # send_notification_admin("New Lead Assign Added", current_count)
 
@@ -4286,7 +4286,7 @@ def lead_emp_add_agent(request):
                 msg = f"New Agent Added({fullname})"
                 create_admin_notification(msg)
 
-                current_count = Notification.objects.filter(is_seen=False).count()
+                current_count = Notification.objects.filter(is_seen__in=[False]).count()
                 send_notification_admin(msg, current_count)
 
                 context = {"employees": relevant_employees, "dep": dep}
@@ -5520,7 +5520,7 @@ def update_assigned_employee(request, id):
             create_notification(emp, "New Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen=False, employee=employee_id
+                is_seen__in=[False], employee=employee_id
             ).count()
             assign_notification(employee_id, "New Assign Added", current_count)
 
@@ -5539,7 +5539,7 @@ def update_assigned_employee(request, id):
             create_notification(emp, "New Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen=False, employee=employee_id
+                is_seen__in=[False], employee=employee_id
             ).count()
             assign_notification(employee_id, "New Assign Added", current_count)
 
@@ -5560,7 +5560,7 @@ def update_assigned_employee(request, id):
             create_notification(emp, "New Lead Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen=False, employee=employee_id
+                is_seen__in=[False], employee=employee_id
             ).count()
             assign_notification(employee_id, "New Lead Assign Added", current_count)
 
@@ -5581,7 +5581,7 @@ def update_assigned_employee(request, id):
             create_notification(emp, "New Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen=False, employee=employee_id
+                is_seen__in=[False], employee=employee_id
             ).count()
             assign_notification(employee_id, "New Assign Added", current_count)
 

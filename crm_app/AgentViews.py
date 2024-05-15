@@ -1663,7 +1663,7 @@ def submit(request):
                 create_notification(enq.assign_to_employee, "New Lead Assign Added")
 
                 current_count = Notification.objects.filter(
-                    is_seen=False, employee=enq.assign_to_employee
+                    is_seen__in=[False], employee=enq.assign_to_employee
                 ).count()
 
                 employee_id = enq.assign_to_employee.id
@@ -1671,7 +1671,7 @@ def submit(request):
 
                 create_admin_notification("New Lead Added")
 
-                current_count = Notification.objects.filter(is_seen=False).count()
+                current_count = Notification.objects.filter(is_seen__in=[False]).count()
                 send_notification_admin("New Lead Assign Added", current_count)
 
         enq.save()
