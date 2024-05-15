@@ -9,7 +9,7 @@ def create_notification(employee, message):
     notification = Notification.objects.create(
         employee=employee,
         name=message,
-        is_seen__in=[False],
+        is_seen=False,
     )
     notification.save()
 
@@ -18,7 +18,7 @@ def create_notification_agent(agent_id, message):
     notification = Notification.objects.create(
         agent=agent_id,
         name=message,
-        is_seen__in=[False],
+        is_seen=False,
     )
     notification.save()
 
@@ -27,7 +27,7 @@ def create_notification_outsourceagent(outsourcepartner, message):
     notification = Notification.objects.create(
         outsourceagent=outsourcepartner,
         name=message,
-        is_seen__in=[False],
+        is_seen=False,
     )
     notification.save()
 
@@ -59,7 +59,7 @@ def assignop_notification(agent_id, message, current_count):
 def create_admin_notification(message):
     notification = Notification.objects.create(
         name=message,
-        is_seen__in=[False],
+        is_seen=False,
     )
     notification.save()
 

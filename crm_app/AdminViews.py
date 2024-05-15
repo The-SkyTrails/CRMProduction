@@ -2593,7 +2593,7 @@ def update_assigned_agent(request, id):
             create_notification_agent(agent, "New Lead Assign Added")
 
             # current_count = Notification.objects.filter(
-            #     is_seen__in=[False], agent=agent_id
+            #     is_seen=False, agent=agent_id
             # ).count()
             # assign_notification(agent_id, "New Lead Assign Added", current_count)
 
@@ -2642,7 +2642,7 @@ def update_assigned_op(request, id):
             )
 
             # current_count = Notification.objects.filter(
-            #     is_seen__in=[False], outsourceagent=assign_to_outsourcingagent
+            #     is_seen=False, outsourceagent=assign_to_outsourcingagent
             # ).count()
             # assignop_notification(agent_id, "New Lead Assign Added", current_count)
 
@@ -2686,7 +2686,7 @@ def update_assigned_employee(request, id):
             create_notification(emp, "New Lead Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen__in=[False], employee=assign_to_employee
+                is_seen=False, employee=assign_to_employee
             ).count()
             assign_notification(employee_id, "New Lead Assign Added", current_count)
 
@@ -2726,7 +2726,7 @@ def update_assigned_employee(request, id):
             create_notification(emp, "New Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen__in=[False], employee=employee_id
+                is_seen=False, employee=employee_id
             ).count()
             assign_notification(employee_id, "New Assign Added", current_count)
 
@@ -2747,7 +2747,7 @@ def update_assigned_employee(request, id):
             create_notification(emp, "New Lead Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen__in=[False], employee=employee_id
+                is_seen=False, employee=employee_id
             ).count()
             assign_notification(employee_id, "New Lead Assign Added", current_count)
 
@@ -2768,7 +2768,7 @@ def update_assigned_employee(request, id):
             create_notification(emp, "New Assign Added")
 
             current_count = Notification.objects.filter(
-                is_seen__in=[False], employee=employee_id
+                is_seen=False, employee=employee_id
             ).count()
             assign_notification(employee_id, "New Assign Added", current_count)
 
