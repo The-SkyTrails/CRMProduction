@@ -533,3 +533,8 @@ def get_group_chat_messages(request):
 
     chat_content = loader.render_to_string("chat/group_chat_content.html", context)
     return HttpResponse(chat_content)
+
+
+
+def gateway_timeout_error_view(request):
+    return render(request, 'gateway_timeout.html', status=504)

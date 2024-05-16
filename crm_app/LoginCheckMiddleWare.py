@@ -66,3 +66,19 @@ class LoginCheckMiddleWare(MiddlewareMixin):
 
             else:
                 return HttpResponseRedirect(reverse("login"))
+
+
+
+
+from django.http import HttpResponse
+from django.urls import reverse
+
+class GatewayTimeoutMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if response.status_code == 504:  # Gateway Timeout status code
+            return HttpResponseRedirect('/gateway_timeout_error/')  # Redirect to a specific URL
+        return response
