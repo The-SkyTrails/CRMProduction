@@ -4025,7 +4025,7 @@ def get_file_extension(content_type):
 @login_required
 def search_enquiries(request):
     user = request.user
-
+    
     if user.is_authenticated:
         if user.user_type == "3":
             emp = user.employee
